@@ -1,0 +1,84 @@
+package components
+
+import (
+	"code-root/src/assets"
+	"code-root/src/game"
+)
+
+templ Game(gameState game.GameState, assets assets.Assets) {
+	<div id="game">
+		<div class="flex flex-row align-center justify-center">
+			<div class="flex flex-row h-screen w-6/12 align-evenly justify-evenly bg-gradient-to-t from-red-200 to-indigo-200 text-white text-center">
+				@FighterStats(gameState.LeftFighter)
+				@FighterIcon(gameState.LeftFighter,assets)
+			</div>
+			<div class="flex flex-row h-screen w-6/12 align-evenly justify-evenly bg-gradient-to-t from-yellow-200 to-blue-200 text-white text-center">
+				@FighterIcon(gameState.RightFighter,assets)
+				@FighterStats(gameState.RightFighter)
+			</div>
+		</div>
+		@Action(gameState.LastAction, gameState.LastAction.Fresh && gameState.LastAction.Direction == game.LEFT_TO_RIGHT)
+	</div>
+}
+
+templ FighterStats(f game.Fighter) {
+	<div class="flex flex-col align-center justify-center w-3/12 h-6/12 bg-gray-400 mt-40">
+		<div>
+			{ f.Name }
+		</div>
+		<div>
+			Health: { f.Health }
+		</div>
+		<div>
+			Damage: { f.Damage }
+		</div>
+		<div>
+			Speed { f.Speed }
+		</div>
+		<div>
+			Timer: { f.Timer } / { game.DEFAULT_TIMER }
+		</div>
+		<div>
+			Accuracy: { f.CritRate * 100 }% 
+		</div>
+		<div>
+			Crit: { f.CritRate * 100 }% 
+		</div>
+	</div>
+}
+
+templ FighterIcon(fighter game.Fighter, assets assets.Assets) {
+		<div 
+			class="animate-bounce mt-62" 
+		>
+			@templ.Raw(assets.IconsSvgs[fighter.Name])
+		</div>
+}
+
+templ Action(a game.Action, visible bool) {
+	if visible {
+		if a.Direction == game.LEFT_TO_RIGHT {
+			if a.WasCrit {
+				@ActionInner("Left attacked right and CRIT! 	")
+			} else {
+				@ActionInner("Left attacked right")
+			}
+		} else {
+			if a.WasCrit {
+				@ActionInner("Right attacked left and CRIT!")
+			} else {
+				@ActionInner("Right attacked left 	")
+			}
+		}
+	} else {
+		@ActionInner("")
+	}
+}
+
+templ ActionInner(text string) {
+	<div 
+		class="fixed bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black"
+	>
+		{text}
+	</div>
+}

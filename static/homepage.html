@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" >
+		<script type="module" defer src="https://cdn.jsdelivr.net/gh/starfederation/datastar@develop/bundles/datastar.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+		<!--<link rel="stylesheet" type="text/css" href="./style.css">-->
+	<style> 
+		svg {
+			width: 250px;
+			height: auto;
+		}
+	</style>
+	</head>
+	<body  
+		data-on-load="@get('/game'); console.log('Loaded');"
+		data-on-interval__duration.1s="@get('/game');console.log('Stepped');" 
+		class="bg-black text-white flex text-center flex-col align-center justify-center gap-2 m-0 p-0"
+	>
+		<h1 
+			class="bg-black text-4xl fixed w-screen top-0 py-1"
+		> Welcome to Js.Bet! </h1>
+		<div id="game"></div>
+	</body>
+
+</html>
