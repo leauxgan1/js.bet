@@ -10,11 +10,138 @@
 			width: 250px;
 			height: auto;
 		}
+		.animate-attack-left {
+			animation-name: "attackleft";
+			animation-duration: 1s;
+			animation-iteration-count: 1;
+			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
+		}
+		@keyframes attackleft {
+			0% {
+				transform: translateX(0);
+			}
+			25% {
+				transform: translateX(-25px);
+			}
+			50% {
+				transform: translateX(50px);
+			}
+			100% {
+				transform: translateX(0);
+			}
+		}
+		.animate-attack-right {
+			animation-name: "attackright";
+			animation-duration: 1s;
+			animation-iteration-count: 1;
+			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
+		}
+		@keyframes attackright {
+			0% {
+				transform: translateX(0);
+			}
+			25% {
+				transform: translateX(25px);
+			}
+			50% {
+				transform: translateX(-50px);
+			}
+			100% {
+				transform: translateX(0);
+			}
+		}
+		.animate-crit-left {
+			animation-name: "critleft";
+			animation-duration: 1s;
+			animation-iteration-count: 1;
+			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
+		}
+		@keyframes critleft {
+			0% {
+				transform: translateX(0);
+			}
+			25% {
+				transform: translateX(-50px);
+			}
+			50% {
+				transform: translateX(100px);
+			}
+			100% {
+				transform: translateX(0);
+			}
+		}
+		.animate-crit-right {
+			animation-name: "critright";
+			animation-duration: 1s;
+			animation-iteration-count: 1;
+			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
+		}
+		@keyframes critright {
+			0% {
+				transform: translateX(0);
+			}
+			25% {
+				transform: translateX(50px);
+			}
+			50% {
+				transform: translateX(100px);
+			}
+			100% {
+				transform: translateX(0);
+			}
+		}
+		.animate-defend-left {
+			animation-name: "defendleft";
+			animation-duration: 2s;
+			animation-iteration-count: 1;
+			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
+		}
+		@keyframes defendleft {
+			0% {
+				transform: translateX(0);
+				transform: translateY(0);
+			}
+			25% {
+				transform: translateX(-40px);
+				transform: translateY(-50px);
+			}
+			50% {
+				transform: translateX(-20px);
+				transform: translateY(-30px);
+			}
+			100% {
+				transform: translateX(0);
+				transform: translateY(0);
+			}
+		}
+		.animate-defend-right {
+			animation-name: "defendright";
+			animation-duration: 2s;
+			animation-iteration-count: 1;
+			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
+		}
+		@keyframes defendright {
+			0% {
+				transform: translateX(0);
+				transform: translateY(0);
+			}
+			25% {
+				transform: translateX(40px);
+				transform: translateY(50px);
+			}
+			50% {
+				transform: translateX(20px);
+				transform: translateY(30px);
+			}
+			100% {
+				transform: translateX(0);
+				transform: translateY(0);
+			}
+		}
 	</style>
 	</head>
 	<body  
 		data-on-load="@get('/game'); console.log('Loaded');"
-		data-on-interval__duration.1s="@get('/game');console.log('Stepped');" 
 		class="bg-black text-white flex text-center flex-col align-center justify-center gap-2 m-0 p-0"
 	>
 		<h1 

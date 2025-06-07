@@ -1,14 +1,16 @@
 package main
 
 import (
+	"code-root/src/assets"
 	"code-root/src/components"
 	"code-root/src/game"
-	"code-root/src/assets"
+	"code-root/src/eventlog"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
+	"path/filepath"
 
 	datastar "github.com/starfederation/datastar/sdk/go"
 )
@@ -22,15 +24,30 @@ var frameCount int
 var homepage []byte 
 var currentGame game.GameState
 var siteAssets assets.Assets
+var db DBClient
+var basePath string
 
 func main() {
+	exePath, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	basePath = filepath.Dir(exePath)
+	staticPath := filepath.Join(basePath,"static")
+	fmt.Println(basePath)
+	fmt.Println(staticPath)
+
+	// Setup event log for server
+	eventlog.EventLog = eventlog.New()
+
 	mux := http.NewServeMux()
 
 	// Handlers
 	mux.HandleFunc("GET /", homepageHandler)
 	mux.HandleFunc("GET /game", getGame)
+	mux.HandleFunc("GET /user/{name}", getGame)
 
-	dir, err := os.ReadFile("../static/homepage.html") 
+	dir, err := os.ReadFile(filepath.Join(staticPath,"homepage.html")) 
 	if err != nil {
 		log.Panic(err)
 	}
@@ -47,9 +64,9 @@ func main() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+	db = CreateClient()
 
 	log.Printf("Starting server on https://localhost:%d\n",PORT)
-
 	// Run server in new goroutine
 	runServer := func() {
 		if err :=	s.ListenAndServe(); err != nil {
@@ -76,7 +93,26 @@ func homepageHandler(w http.ResponseWriter, r *http.Request) {
 
 func getGame(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w,r)
-	sse.MergeFragmentTempl(components.Game(currentGame,siteAssets))
+	for {
+		sse.MergeFragmentTempl(components.Game(currentGame,siteAssets,eventlog.EventLog))
+		time.Sleep(time.Millisecond * 100)
+	}
 }
+
+func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
+	
+}
+
+func handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	name := params.Get("name")
+	// gold := db.GetUserGold(name)
+	w.Write([]byte(fmt.Sprintf("Got name: %s",name)))
+}
+
+func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
+	
+}
+
 
 

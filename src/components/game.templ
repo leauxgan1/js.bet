@@ -3,26 +3,33 @@ package components
 import (
 	"code-root/src/assets"
 	"code-root/src/game"
+	"code-root/src/eventlog"
 )
 
-templ Game(gameState game.GameState, assets assets.Assets) {
+templ Game(gameState game.GameState, assets assets.Assets, events eventlog.FighterEventLog) {
 	<div id="game">
-		<div class="flex flex-row align-center justify-center">
-			<div class="flex flex-row h-screen w-6/12 align-evenly justify-evenly bg-gradient-to-t from-red-200 to-indigo-200 text-white text-center">
+		<div id="FighterSides" class="flex flex-row align-center justify-center">
+			<div 
+				id="LeftFighterSide" 
+				class="flex flex-row h-screen w-6/12 align-evenly justify-evenly bg-gradient-to-t from-red-200 to-indigo-200 text-white text-center"
+			>
 				@FighterStats(gameState.LeftFighter)
-				@FighterIcon(gameState.LeftFighter,assets)
+				@FighterIcon(gameState.LeftFighter,true,assets)
 			</div>
-			<div class="flex flex-row h-screen w-6/12 align-evenly justify-evenly bg-gradient-to-t from-yellow-200 to-blue-200 text-white text-center">
-				@FighterIcon(gameState.RightFighter,assets)
+			<div 
+				id="RightFighterSide" 
+				class="flex flex-row h-screen w-6/12 align-evenly justify-evenly bg-gradient-to-t from-yellow-200 to-blue-200 text-white text-center"
+			>
+				@FighterIcon(gameState.RightFighter,false,assets)
 				@FighterStats(gameState.RightFighter)
 			</div>
 		</div>
-		@Action(gameState.LastAction, gameState.LastAction.Fresh && gameState.LastAction.Direction == game.LEFT_TO_RIGHT)
+		@EventLog(events)
 	</div>
 }
 
 templ FighterStats(f game.Fighter) {
-	<div class="flex flex-col align-center justify-center w-3/12 h-6/12 bg-gray-400 mt-40">
+	<div id={"FighterInner" + f.Name} class="flex flex-col align-center justify-center w-3/12 h-6/12 bg-gray-400 mt-40 border border-4 border-black">
 		<div>
 			{ f.Name }
 		</div>
@@ -47,38 +54,57 @@ templ FighterStats(f game.Fighter) {
 	</div>
 }
 
-templ FighterIcon(fighter game.Fighter, assets assets.Assets) {
+templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
+	{{
+		var animationName string
+		if left {
+			switch fighter.State {
+				case game.READY:
+					animationName = "animate-bounce"
+				case game.ATTACKING:
+					animationName = "animate-attack-left"
+				case game.CRITTING:
+					animationName = "animate-crit-left"
+				case game.DEFENDING:
+					animationName = "animate-defend-left"
+				default:
+					animationName = "animate-bounce"
+			}
+		} else {
+			switch fighter.State {
+				case game.READY:
+					animationName = "animate-bounce"
+				case game.ATTACKING:
+					animationName = "animate-attack-right"
+				case game.CRITTING:
+					animationName = "animate-crit-right"
+				case game.DEFENDING:
+					animationName = "animate-defend-right"
+				default:
+					animationName = "animate-bounce"
+			}
+		}
+	}}
 		<div 
-			class="animate-bounce mt-62" 
+			class={animationName + " mt-62"} 
 		>
 			@templ.Raw(assets.IconsSvgs[fighter.Name])
 		</div>
 }
 
-templ Action(a game.Action, visible bool) {
-	if visible {
-		if a.Direction == game.LEFT_TO_RIGHT {
-			if a.WasCrit {
-				@ActionInner("Left attacked right and CRIT! 	")
-			} else {
-				@ActionInner("Left attacked right")
-			}
-		} else {
-			if a.WasCrit {
-				@ActionInner("Right attacked left and CRIT!")
-			} else {
-				@ActionInner("Right attacked left 	")
-			}
+templ EventLog(f eventlog.FighterEventLog) {
+	<ul
+		class="fixed bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black overflow-y-scroll overflow-x-auto"
+	>
+		for _, item := range f.Log {
+			@EventInner(item)
 		}
-	} else {
-		@ActionInner("")
-	}
+	</ul>
 }
 
-templ ActionInner(text string) {
-	<div 
-		class="fixed bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black"
+templ EventInner(text string) {
+	<li 
 	>
 		{text}
-	</div>
+	</li>
 }
