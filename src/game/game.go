@@ -1,15 +1,16 @@
 package game
 
 import (
+	"code-root/src/eventlog"
 	"errors"
 	"fmt"
-	"math/rand/v2"
 	"log"
+	"math/rand/v2"
 )
 
 type Action struct {
-	Fresh bool
 	Direction InitiativeEnum
+	WasHit bool
 	WasCrit bool
 }
 
@@ -53,7 +54,7 @@ func (g *GameState) ResetKeepWinner() {
 	}
 }
 
-type WinnerEnum int
+type WinnerEnum uint
 const (
 	_ = iota
 	LEFT
@@ -61,19 +62,30 @@ const (
 	NEITHER
 )
 
+type FighterState uint 
+const (
+	_ = iota
+	READY
+	DEFENDING
+	ATTACKING
+	CRITTING
+)
+
 type Fighter struct {
-	Name string      // Name of framework/library
-	Health int       // Represents how much of a "industry standard" the framework/library is / likelihood to stick around or be popular
-	maxHealth int    
-	Damage int       // Represents how consistently useful the framework/library is for common tasks
-	Speed int        // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
-	Timer int				 // Time before next action of fighter, reduced by speed each turn
-	Accuracy float32 // Represents how simple the library/frame work is / how easy it is to get it right at first, causes less misses
-	CritRate float32 // Represents how suprisingly useful or versatile the framework/library is in niche situations
+	Name string         // Name of framework/library
+	Health int          // Represents how much of a "industry standard" the framework/library is / likelihood to stick around or be popular
+	maxHealth int       
+	Damage int          // Represents how consistently useful the framework/library is for common tasks
+	Speed int           // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
+	Timer int				    // Time before next action of fighter, reduced by speed each turn
+	Accuracy float32    // Represents how simple the library/frame work is / how easy it is to get it right at first, causes less misses
+	CritRate float32    // Represents how suprisingly useful or versatile the framework/library is in niche situations
+	State FighterState
 }
 const DEFAULT_TIMER = 25
 
 func (f *Fighter) Reset() *Fighter {
+	f.State = READY
 	f.Health = f.maxHealth
 	return f
 }
@@ -179,36 +191,41 @@ const (
 func (g *GameState) Act(initiative InitiativeEnum)  {
 	var crit bool
 	if initiative == LEFT_TO_RIGHT {
+		g.LeftFighter.Timer = DEFAULT_TIMER
+		
 		hit := g.LeftFighter.CheckHit()
 		damage := g.LeftFighter.Damage
+		g.LeftFighter.State = ATTACKING
 		if !hit {
-			damage = 0
+			eventlog.EventLog.Write(fmt.Sprintf("%s just missed...",g.LeftFighter.Name))
+			return
 		}
+		g.RightFighter.State = DEFENDING
 		crit = g.LeftFighter.CheckCrit()
 		if crit {
 			damage *= 2.0
-			log.Printf("Just crit for %d!\n",damage)
+			g.LeftFighter.State = CRITTING
+			eventlog.EventLog.Write(fmt.Sprintf("%s just crit %s for %d",g.LeftFighter.Name,g.RightFighter.Name,damage))
 		} 		
 		g.RightFighter.Health -= damage
-		g.LeftFighter.Timer = DEFAULT_TIMER
 	} else { // RIGHT_TO_LEFT
+		g.RightFighter.Timer = DEFAULT_TIMER
+
 		hit := g.RightFighter.CheckHit()
 		damage := g.LeftFighter.Damage
+		g.RightFighter.State = ATTACKING
 		if !hit {
-			damage = 0
+			eventlog.EventLog.Write(fmt.Sprintf("%s just missed...",g.RightFighter.Name))
+			return
 		}
+		g.LeftFighter.State = DEFENDING
 		crit = g.LeftFighter.CheckCrit()
 		if crit {
 			damage *= 2.0
-			log.Printf("Just crit for %d!\n",damage)
+			g.RightFighter.State = CRITTING
+			eventlog.EventLog.Write(fmt.Sprintf("%s just crit %s for %d",g.RightFighter.Name,g.LeftFighter.Name,damage))
 		} 		
 		g.LeftFighter.Health -= damage
-		g.RightFighter.Timer = DEFAULT_TIMER
-	}
-	g.LastAction = Action {
-		Fresh: true,
-		Direction: initiative,
-		WasCrit: crit,
 	}
 }
 func (f Fighter) CheckHit() bool {
@@ -226,11 +243,13 @@ func (f Fighter) CheckCrit() bool {
 }
 
 func (g *GameState) StepGame()  {
-	log.Printf("Game Running on frame %d\n",g.FrameCount)
+	log.Printf("Game Running on frame %d with log:\n",g.FrameCount)
 	g.FrameCount += 1
+	g.RightFighter.State = READY
+	g.LeftFighter.State = READY
+
 	lReady := g.LeftFighter.Timer <= 0
 	rReady := g.RightFighter.Timer <= 0
-	g.LastAction.Fresh = false
 	if lReady && rReady {
 		// Choose lesser Timer when both ready, higher speed on ties
 		if g.LeftFighter.Timer == g.RightFighter.Timer {

@@ -1,3 +1,0 @@
-templ generate
-
-go run .
