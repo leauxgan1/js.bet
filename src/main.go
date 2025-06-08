@@ -45,7 +45,7 @@ func main() {
 	// Handlers
 	mux.HandleFunc("GET /", homepageHandler)
 	mux.HandleFunc("GET /game", getGame)
-	mux.HandleFunc("GET /user/{name}", getGame)
+	mux.HandleFunc("GET /user/{name}", handleGetUserInfo)
 
 	dir, err := os.ReadFile(filepath.Join(staticPath,"homepage.html")) 
 	if err != nil {
@@ -93,10 +93,11 @@ func homepageHandler(w http.ResponseWriter, r *http.Request) {
 
 func getGame(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w,r)
-	for {
-		sse.MergeFragmentTempl(components.Game(currentGame,siteAssets,eventlog.EventLog))
-		time.Sleep(time.Millisecond * 100)
-	}
+	// for {
+	sse.MergeFragmentTempl(components.Game(currentGame,siteAssets,eventlog.EventLog))
+	// 	time.Sleep(time.Millisecond * 500)
+	// }
+	
 }
 
 func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
@@ -106,8 +107,9 @@ func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
 func handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	name := params.Get("name")
+	w.Header().Set("Content-Type","text/html")
 	// gold := db.GetUserGold(name)
-	w.Write([]byte(fmt.Sprintf("Got name: %s",name)))
+	w.Write([]byte(fmt.Sprintf("<div>Got name: %s</div>",name)))
 }
 
 func handlePlaceBet(w http.ResponseWriter, r *http.Request) {

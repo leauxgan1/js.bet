@@ -192,7 +192,7 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(f.CritRate * 100)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(f.Accuracy * 100)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/game.templ`, Line: 49, Col: 31}
 		}
@@ -244,32 +244,28 @@ func FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) templ.Co
 		ctx = templ.ClearChildren(ctx)
 
 		var animationName string
-		if left {
-			switch fighter.State {
-			case game.READY:
-				animationName = "animate-bounce"
-			case game.ATTACKING:
-				animationName = "animate-attack-left"
-			case game.CRITTING:
-				animationName = "animate-crit-left"
-			case game.DEFENDING:
-				animationName = "animate-defend-left"
-			default:
-				animationName = "animate-bounce"
-			}
-		} else {
-			switch fighter.State {
-			case game.READY:
-				animationName = "animate-bounce"
-			case game.ATTACKING:
-				animationName = "animate-attack-right"
-			case game.CRITTING:
-				animationName = "animate-crit-right"
-			case game.DEFENDING:
-				animationName = "animate-defend-right"
-			default:
-				animationName = "animate-bounce"
-			}
+
+		wounded := fighter.Health <= fighter.MaxHealth/2
+		var defaultAnim string = "bounce"
+		if wounded {
+			defaultAnim = "wounded"
+		}
+
+		var dir string = "left"
+		if !left {
+			dir = "right"
+		}
+		switch fighter.State {
+		case game.READY:
+			animationName = "animate-" + defaultAnim
+		case game.ATTACKING:
+			animationName = "animate-attack-" + dir
+		case game.CRITTING:
+			animationName = "animate-crit-" + dir
+		case game.DEFENDING:
+			animationName = "animate-defend-" + dir
+		default:
+			animationName = "animate-" + defaultAnim
 		}
 		var templ_7745c5c3_Var13 = []any{animationName + " mt-62"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var13...)
@@ -326,7 +322,7 @@ func EventLog(f eventlog.FighterEventLog) templ.Component {
 			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<ul class=\"fixed bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black overflow-y-scroll overflow-x-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<ul id=\"LogList\" class=\"fixed flex flex-col-reverse align-center justify-center bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black overflow-y-scroll overflow-x-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -372,7 +368,7 @@ func EventInner(text string) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/game.templ`, Line: 108, Col: 7}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/game.templ`, Line: 105, Col: 7}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
