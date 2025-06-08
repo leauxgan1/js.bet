@@ -69,12 +69,13 @@ const (
 	DEFENDING
 	ATTACKING
 	CRITTING
+	DYING
 )
 
 type Fighter struct {
 	Name string         // Name of framework/library
 	Health int          // Represents how much of a "industry standard" the framework/library is / likelihood to stick around or be popular
-	maxHealth int       
+	MaxHealth int       
 	Damage int          // Represents how consistently useful the framework/library is for common tasks
 	Speed int           // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
 	Timer int				    // Time before next action of fighter, reduced by speed each turn
@@ -86,7 +87,7 @@ const DEFAULT_TIMER = 25
 
 func (f *Fighter) Reset() *Fighter {
 	f.State = READY
-	f.Health = f.maxHealth
+	f.Health = f.MaxHealth
 	return f
 }
 
@@ -94,61 +95,61 @@ var fighterList = [...]Fighter {
 	{
 		Name: "JQuery",
 		Health: 15,
-		maxHealth: 15,
+		MaxHealth: 15,
 		Damage: 4,
 		Speed: 8,
 		Timer: DEFAULT_TIMER,
-		Accuracy: 0.4,
+		Accuracy: 0.5,
 		CritRate: 0.0,
 	},
 	{
 		Name: "React",
 		Health: 10,
-		maxHealth: 10,
+		MaxHealth: 10,
 		Damage: 5,
 		Speed: 3,
 		Timer: DEFAULT_TIMER,
-		Accuracy: 0.5,
+		Accuracy: 0.6,
 		CritRate: 0.2,
 	},
 	{
 		Name: "Svelte",
 		Health: 8,
-		maxHealth: 8,
+		MaxHealth: 8,
 		Damage: 5,
 		Speed: 7,
 		Timer: DEFAULT_TIMER,
-		Accuracy: 0.7,
+		Accuracy: 0.8,
 		CritRate: 0.4,
 	},
 	{
 		Name: "Solid",
 		Health: 8,
-		maxHealth: 8,
+		MaxHealth: 8,
 		Damage: 6,
 		Speed: 7,
 		Timer: DEFAULT_TIMER,
-		Accuracy: 0.7,
+		Accuracy: 0.8,
 		CritRate: 0.3,
 	},
 	{
 		Name: "HTMX",
 		Health: 5,
-		maxHealth: 5,
+		MaxHealth: 5,
 		Damage: 10,
 		Speed: 8,
 		Timer: DEFAULT_TIMER,
-		Accuracy: 0.9,
+		Accuracy: 0.99,
 		CritRate: 0.4,
 	},
 	{
 		Name: "Datastar",
 		Health: 4,
-		maxHealth: 4,
+		MaxHealth: 4,
 		Damage: 11,
 		Speed: 9,
 		Timer: DEFAULT_TIMER,
-		Accuracy: 0.9,
+		Accuracy: 0.99,
 		CritRate: 0.4,
 	},
 }
@@ -206,6 +207,8 @@ func (g *GameState) Act(initiative InitiativeEnum)  {
 			damage *= 2.0
 			g.LeftFighter.State = CRITTING
 			eventlog.EventLog.Write(fmt.Sprintf("%s just crit %s for %d",g.LeftFighter.Name,g.RightFighter.Name,damage))
+		} else {
+			eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d",g.LeftFighter.Name,g.RightFighter.Name,damage))
 		} 		
 		g.RightFighter.Health -= damage
 	} else { // RIGHT_TO_LEFT
@@ -224,12 +227,14 @@ func (g *GameState) Act(initiative InitiativeEnum)  {
 			damage *= 2.0
 			g.RightFighter.State = CRITTING
 			eventlog.EventLog.Write(fmt.Sprintf("%s just crit %s for %d",g.RightFighter.Name,g.LeftFighter.Name,damage))
-		} 		
+		} else {
+			eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d",g.RightFighter.Name,g.LeftFighter.Name,damage))
+		}
 		g.LeftFighter.Health -= damage
 	}
 }
 func (f Fighter) CheckHit() bool {
-	if f.Accuracy > 0.0 && rand.Float32() < f.CritRate {
+	if f.Accuracy > 0.0 && rand.Float32() < f.Accuracy {
 		return true
 	}
 	return false
@@ -247,6 +252,27 @@ func (g *GameState) StepGame()  {
 	g.FrameCount += 1
 	g.RightFighter.State = READY
 	g.LeftFighter.State = READY
+
+	// Check for a non-positive health, choose a winner and keep them in the game for the next round
+	if(g.LeftFighter.Health <= 0 && g.RightFighter.Health <= 0) {
+		if g.LeftFighter.Health == g.RightFighter.Health {
+			g.Winner = NEITHER
+		} else if g.LeftFighter.Health < g.RightFighter.Health {
+			g.Winner = RIGHT
+		} else {
+			g.Winner = LEFT
+		}
+		g.ResetKeepWinner()
+		return
+	} else if (g.LeftFighter.Health <= 0) {
+		g.Winner = RIGHT
+		g.ResetKeepWinner()
+		return
+	} else if (g.RightFighter.Health <= 0) {
+		g.Winner = LEFT
+		g.ResetKeepWinner()
+		return
+	}
 
 	lReady := g.LeftFighter.Timer <= 0
 	rReady := g.RightFighter.Timer <= 0
@@ -275,27 +301,7 @@ func (g *GameState) StepGame()  {
 		g.Act(LEFT_TO_RIGHT)
 	} else if rReady {
 		g.Act(RIGHT_TO_LEFT)
-	}
-	// Upon getting a non-positive health, choose a winner and keep them in the game for the next round
-	if(g.LeftFighter.Health <= 0 && g.RightFighter.Health <= 0) {
-		if g.LeftFighter.Health == g.RightFighter.Health {
-			g.Winner = NEITHER
-		} else if g.LeftFighter.Health < g.RightFighter.Health {
-			g.Winner = RIGHT
-		} else {
-			g.Winner = LEFT
-		}
-		g.ResetKeepWinner()
-		return
-	} else if (g.LeftFighter.Health <= 0) {
-		g.Winner = RIGHT
-		g.ResetKeepWinner()
-		return
-	} else if (g.RightFighter.Health <= 0) {
-		g.Winner = LEFT
-		g.ResetKeepWinner()
-		return
-	}
+	} 
 	g.LeftFighter.Timer -= g.LeftFighter.Speed
 	g.RightFighter.Timer -= g.RightFighter.Speed
 }

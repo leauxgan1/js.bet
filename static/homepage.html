@@ -10,6 +10,30 @@
 			width: 250px;
 			height: auto;
 		}
+		ul {
+			overflow-anchor: auto;
+		}
+		.animate-bounce {
+			animation: bounce 1s infinite;
+		}
+		@keyframes bounce {
+			0%, 100% {
+				transform: translateY(-25%);
+				animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+			}
+			50% {
+				transform: none;
+				animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+			}
+		}
+		.animate-wounded {
+			animation: bounce 1s infinite, pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		}
+		@keyframes pulse {
+			50% {
+				opacity: 0.5;
+			}
+		}
 		.animate-attack-left {
 			animation-name: "attackleft";
 			animation-duration: 1s;
@@ -17,7 +41,7 @@
 			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
 		}
 		@keyframes attackleft {
-			0% {
+			0%,100% {
 				transform: translateX(0);
 			}
 			25% {
@@ -25,9 +49,6 @@
 			}
 			50% {
 				transform: translateX(50px);
-			}
-			100% {
-				transform: translateX(0);
 			}
 		}
 		.animate-attack-right {
@@ -37,7 +58,7 @@
 			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
 		}
 		@keyframes attackright {
-			0% {
+			0%,100% {
 				transform: translateX(0);
 			}
 			25% {
@@ -45,9 +66,6 @@
 			}
 			50% {
 				transform: translateX(-50px);
-			}
-			100% {
-				transform: translateX(0);
 			}
 		}
 		.animate-crit-left {
@@ -57,7 +75,7 @@
 			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
 		}
 		@keyframes critleft {
-			0% {
+			0%,100% {
 				transform: translateX(0);
 			}
 			25% {
@@ -65,9 +83,6 @@
 			}
 			50% {
 				transform: translateX(100px);
-			}
-			100% {
-				transform: translateX(0);
 			}
 		}
 		.animate-crit-right {
@@ -77,7 +92,7 @@
 			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
 		}
 		@keyframes critright {
-			0% {
+			0%,100% {
 				transform: translateX(0);
 			}
 			25% {
@@ -85,9 +100,6 @@
 			}
 			50% {
 				transform: translateX(100px);
-			}
-			100% {
-				transform: translateX(0);
 			}
 		}
 		.animate-defend-left {
@@ -97,7 +109,7 @@
 			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
 		}
 		@keyframes defendleft {
-			0% {
+			0%,100% {
 				transform: translateX(0);
 				transform: translateY(0);
 			}
@@ -109,10 +121,6 @@
 				transform: translateX(-20px);
 				transform: translateY(-30px);
 			}
-			100% {
-				transform: translateX(0);
-				transform: translateY(0);
-			}
 		}
 		.animate-defend-right {
 			animation-name: "defendright";
@@ -121,7 +129,7 @@
 			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
 		}
 		@keyframes defendright {
-			0% {
+			0%, 100% {
 				transform: translateX(0);
 				transform: translateY(0);
 			}
@@ -133,15 +141,12 @@
 				transform: translateX(20px);
 				transform: translateY(30px);
 			}
-			100% {
-				transform: translateX(0);
-				transform: translateY(0);
-			}
 		}
 	</style>
 	</head>
 	<body  
-		data-on-load="@get('/game'); console.log('Loaded');"
+		data-on-load="@get('/game')"
+		data-on-interval__.1s="@get('/game')"
 		class="bg-black text-white flex text-center flex-col align-center justify-center gap-2 m-0 p-0"
 	>
 		<h1 
