@@ -12,6 +12,7 @@ import (
 	"time"
 	"path/filepath"
 
+
 	datastar "github.com/starfederation/datastar/sdk/go"
 )
 
@@ -19,33 +20,33 @@ const (
 	PORT = 8080
 )
 
-
 var frameCount int
 var homepage []byte 
 var currentGame game.GameState
 var siteAssets assets.Assets
 var db DBClient
 var basePath string
+var staticPath string
+var fileServer http.Handler
 
 func main() {
-	exePath, err := os.Getwd()
+	projectRoot, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	basePath = filepath.Dir(exePath)
-	staticPath := filepath.Join(basePath,"static")
-	fmt.Println(basePath)
-	fmt.Println(staticPath)
+	projectRoot = filepath.Dir(projectRoot)
+	staticPath = filepath.Join(projectRoot,"static")
 
-	// Setup event log for server
-	eventlog.EventLog = eventlog.New()
+	fileServer = http.FileServer(http.Dir(staticPath))
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/", homepageHandler)
 
 	// Handlers
-	mux.HandleFunc("GET /", homepageHandler)
-	mux.HandleFunc("GET /game", getGame)
-	mux.HandleFunc("GET /user/{name}", handleGetUserInfo)
+	// mux.HandleFunc("/", homepageHandler)
+	mux.HandleFunc("/game/", getGame)
+	mux.HandleFunc("/user/{name}", handleGetUserInfo)
+	mux.HandleFunc("/placeBet/{amount}", handlePlaceBet)
 
 	dir, err := os.ReadFile(filepath.Join(staticPath,"homepage.html")) 
 	if err != nil {
@@ -53,15 +54,18 @@ func main() {
 	}
 	homepage = dir
 
+	// Setup event log for server
+	eventlog.EventLog = eventlog.New()
+
 	siteAssets = assets.New()
-	siteAssets.ReadIcons("../static/icons")
+	siteAssets.ReadIcons(filepath.Join(staticPath,"icons"))
 
 	port := fmt.Sprintf(":%d",PORT)
 	s := &http.Server {
 		Addr:           port,
 		Handler:       	mux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		WriteTimeout: time.Second * 5,
+		ReadTimeout: time.Second * 5,
 		MaxHeaderBytes: 1 << 20,
 	}
 	db = CreateClient()
@@ -88,16 +92,25 @@ func main() {
 }
 
 func homepageHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write(homepage)
+	fileServer.ServeHTTP(w,r)
 }
 
 func getGame(w http.ResponseWriter, r *http.Request) {
+	rc := http.NewResponseController(w)
 	sse := datastar.NewSSE(w,r)
-	// for {
-	sse.MergeFragmentTempl(components.Game(currentGame,siteAssets,eventlog.EventLog))
-	// 	time.Sleep(time.Millisecond * 500)
-	// }
-	
+	for {
+		gameRender := components.Game(currentGame,siteAssets,eventlog.EventLog)
+		err := sse.MergeFragmentTempl(gameRender)
+		if err != nil {
+			panic(err)
+		}
+
+		err = rc.SetWriteDeadline(time.Now().Add(time.Second * 5))
+		if err != nil {
+			panic(err)
+		}
+		time.Sleep(time.Millisecond * 500)
+	}
 }
 
 func handleLoginRequest(w http.ResponseWriter, r *http.Request) {

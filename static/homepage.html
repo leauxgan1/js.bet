@@ -1,158 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" >
-		<script type="module" defer src="https://cdn.jsdelivr.net/gh/starfederation/datastar@develop/bundles/datastar.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-		<!--<link rel="stylesheet" type="text/css" href="./style.css">-->
-	<style> 
-		svg {
-			width: 250px;
-			height: auto;
-		}
-		ul {
-			overflow-anchor: auto;
-		}
-		.animate-bounce {
-			animation: bounce 1s infinite;
-		}
-		@keyframes bounce {
-			0%, 100% {
-				transform: translateY(-25%);
-				animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-			}
-			50% {
-				transform: none;
-				animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-			}
-		}
-		.animate-wounded {
-			animation: bounce 1s infinite, pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-		}
-		@keyframes pulse {
-			50% {
-				opacity: 0.5;
-			}
-		}
-		.animate-attack-left {
-			animation-name: "attackleft";
-			animation-duration: 1s;
-			animation-iteration-count: 1;
-			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
-		}
-		@keyframes attackleft {
-			0%,100% {
-				transform: translateX(0);
-			}
-			25% {
-				transform: translateX(-25px);
-			}
-			50% {
-				transform: translateX(50px);
-			}
-		}
-		.animate-attack-right {
-			animation-name: "attackright";
-			animation-duration: 1s;
-			animation-iteration-count: 1;
-			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
-		}
-		@keyframes attackright {
-			0%,100% {
-				transform: translateX(0);
-			}
-			25% {
-				transform: translateX(25px);
-			}
-			50% {
-				transform: translateX(-50px);
-			}
-		}
-		.animate-crit-left {
-			animation-name: "critleft";
-			animation-duration: 1s;
-			animation-iteration-count: 1;
-			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
-		}
-		@keyframes critleft {
-			0%,100% {
-				transform: translateX(0);
-			}
-			25% {
-				transform: translateX(-50px);
-			}
-			50% {
-				transform: translateX(100px);
-			}
-		}
-		.animate-crit-right {
-			animation-name: "critright";
-			animation-duration: 1s;
-			animation-iteration-count: 1;
-			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
-		}
-		@keyframes critright {
-			0%,100% {
-				transform: translateX(0);
-			}
-			25% {
-				transform: translateX(50px);
-			}
-			50% {
-				transform: translateX(100px);
-			}
-		}
-		.animate-defend-left {
-			animation-name: "defendleft";
-			animation-duration: 2s;
-			animation-iteration-count: 1;
-			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
-		}
-		@keyframes defendleft {
-			0%,100% {
-				transform: translateX(0);
-				transform: translateY(0);
-			}
-			25% {
-				transform: translateX(-40px);
-				transform: translateY(-50px);
-			}
-			50% {
-				transform: translateX(-20px);
-				transform: translateY(-30px);
-			}
-		}
-		.animate-defend-right {
-			animation-name: "defendright";
-			animation-duration: 2s;
-			animation-iteration-count: 1;
-			animation-timing-function: cubic-bezier(0.4,0,0.2,1);
-		}
-		@keyframes defendright {
-			0%, 100% {
-				transform: translateX(0);
-				transform: translateY(0);
-			}
-			25% {
-				transform: translateX(40px);
-				transform: translateY(50px);
-			}
-			50% {
-				transform: translateX(20px);
-				transform: translateY(30px);
-			}
-		}
-	</style>
-	</head>
-	<body  
-		data-on-load="@get('/game')"
-		data-on-interval__.1s="@get('/game')"
-		class="bg-black text-white flex text-center flex-col align-center justify-center gap-2 m-0 p-0"
-	>
-		<h1 
-			class="bg-black text-4xl fixed w-screen top-0 py-1"
-		> Welcome to Js.Bet! </h1>
-		<div id="game"></div>
-	</body>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <!--<link href="./styles/output.css" type="text/css" rel="stylesheet">-->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="./styles/animations.css" type="text/css" rel="stylesheet">
+  <script type="module" defer
+    src="https://cdn.jsdelivr.net/gh/starfederation/datastar@develop/bundles/datastar.js"></script>
+</head>
+
+<body data-on-load="@get('/game')"
+  class="bg-black text-white flex text-center flex-col align-center justify-center gap-2 m-0 p-0">
+  <h1 class="bg-black text-4xl fixed w-screen top-0 py-1"> Welcome to Js.Bet! </h1>
+  <div id="game"></div>
+</body>
 
 </html>
