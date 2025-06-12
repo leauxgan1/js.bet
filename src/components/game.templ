@@ -4,24 +4,32 @@ import (
 	"code-root/src/assets"
 	"code-root/src/game"
 	"code-root/src/eventlog"
+	"fmt"
+	"strings"
 )
 
 templ Game(gameState game.GameState, assets assets.Assets, events eventlog.FighterEventLog) {
-	<div id="game">
-		<div id="FighterSides" class="flex flex-row align-center justify-center">
+	<div id="game" class="overflow-hidden">
+		<div id="FighterSides" class="flex flex-row justify-around align-around">
 			<div 
 				id="LeftFighterSide" 
-				class="flex flex-row h-screen w-6/12 align-evenly justify-evenly bg-gradient-to-t from-red-200 to-indigo-200 text-white text-center"
+				class="flex flex-row h-screen w-6/12 align-evenly justify-around bg-gradient-to-t from-red-200 to-indigo-200 text-white text-center"
 			>
-				@FighterStats(gameState.LeftFighter)
+				<div class="mt-auto flex flex-col w-4/12 h-10/12 justify-evenly align-evenly">
+					@FighterStats(gameState.LeftFighter)
+					@Bet(game.LEFT_TO_RIGHT)
+				</div>
 				@FighterIcon(gameState.LeftFighter,true,assets)
 			</div>
 			<div 
 				id="RightFighterSide" 
-				class="flex flex-row h-screen w-6/12 align-evenly justify-evenly bg-gradient-to-t from-yellow-200 to-blue-200 text-white text-center"
+				class="flex flex-row h-screen w-6/12 align-center justify-around bg-gradient-to-t from-yellow-200 to-blue-200 text-white text-center"
 			>
 				@FighterIcon(gameState.RightFighter,false,assets)
-				@FighterStats(gameState.RightFighter)
+				<div class="mt-auto flex flex-col w-4/12 h-10/12 justify-evenly align-evenly">
+					@FighterStats(gameState.RightFighter)
+					@Bet(game.RIGHT_TO_LEFT)
+				</div>
 			</div>
 		</div>
 		@EventLog(events)
@@ -29,7 +37,10 @@ templ Game(gameState game.GameState, assets assets.Assets, events eventlog.Fight
 }
 
 templ FighterStats(f game.Fighter) {
-	<div id={"FighterInner" + f.Name} class="flex flex-col align-center justify-center w-3/12 h-6/12 bg-gray-400 mt-40 border border-4 border-black">
+	<div 
+		id={"FighterInner" + f.Name} 
+		class="m-auto flex flex-col align-center justify-center w-10/12 h-6/12 bg-gray-400 border border-4 border-black "
+	>
 		<div>
 			{ f.Name }
 		</div>
@@ -37,8 +48,7 @@ templ FighterStats(f game.Fighter) {
 			Health: { f.Health }
 		</div>
 		<div>
-			Damage: { f.Damage }
-		</div>
+			Damage: { f.Damage } </div>
 		<div>
 			Speed { f.Speed }
 		</div>
@@ -46,10 +56,10 @@ templ FighterStats(f game.Fighter) {
 			Timer: { f.Timer } / { game.DEFAULT_TIMER }
 		</div>
 		<div>
-			Accuracy: { f.Accuracy * 100 }% 
-		</div>
+			Accuracy: { strings.Split(fmt.Sprintf("%f",f.Accuracy * 100),".")[0] }% 
+		</div> 
 		<div>
-			Crit: { f.CritRate * 100 }% 
+			Crit: { strings.Split(fmt.Sprintf("%f",f.CritRate * 100),".")[0] }% 
 		</div>
 	</div>
 }
@@ -100,8 +110,44 @@ templ EventLog(f eventlog.FighterEventLog) {
 }
 
 templ EventInner(text string) {
-	<li 
-	>
+	<li>
 		{text}
 	</li>
+}
+
+templ Bet(side game.InitiativeEnum) {
+	{{
+		var betID string
+		var requestText string
+		var betTitle string
+		if side == game.LEFT_TO_RIGHT {
+			requestText = "@post('/placeBet/left/$betamount');console.log('sent bet!');"
+			betID = "leftBetButton"
+			betTitle = "Left"
+		} else {
+			requestText = "@post('/placeBet/right/$betamount;console.log('sent bet!');')"
+			betID = "rightBetButton"
+			betTitle = "Right"
+		}
+	}}
+	<div 
+		id={betID}
+		class="m-auto flex flex-col align-center justify-evenly w-10/12 h-3/12 bg-blue-400 border-6 border-color-black"
+	>
+		<div> Bet on {betTitle}! </div>
+		<input class="text-center border-4 border-color-white" value="10" type="number" data-bind-betamount></input>
+		<button 
+			class="hover:bg-blue-300 hover:border-blue-600 hover:transition-colors transition-colors hover:ease-in-out bg-blue-500 border-4 border-white rounded" 
+			type="button" 
+			data-on-click={requestText}
+		>
+			Place Bet
+		</button>
+	</div>
+}
+templ Popup(info string) {
+	<div>
+		<p> {info} </p>
+		<button> Close </button>
+	</div>
 }
