@@ -33,7 +33,7 @@
 					ssr = { type = "app"; program = "${self.packages.${system}.ssr}/bin/ssr";};
 				};
 				devShells.default = pkgs.mkShell {
-					packages = [ go pkgs.gopls templ];
+					packages = [ go pkgs.gopls templ pkgs.sqlite];
 					shellHook = ''
 						echo Go available with version $(go version)
 					'';
