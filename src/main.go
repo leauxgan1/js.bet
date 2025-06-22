@@ -32,7 +32,7 @@ var fileServer http.Handler
 func main() {
 	projectRoot, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	projectRoot = filepath.Dir(projectRoot)
 	staticPath = filepath.Join(projectRoot,"static")
@@ -45,8 +45,9 @@ func main() {
 	// Handlers
 	// mux.HandleFunc("/", homepageHandler)
 	mux.HandleFunc("/game/", getGame)
-	mux.HandleFunc("/user/{name}", handleGetUserInfo)
-	mux.HandleFunc("/placeBet/{amount}", handlePlaceBet)
+	mux.HandleFunc("/user/new/", handleLoginRequest)
+	mux.HandleFunc("/user/gold/", handleGetUserInfo)
+	mux.HandleFunc("/placeBet/", handlePlaceBet)
 
 	dir, err := os.ReadFile(filepath.Join(staticPath,"homepage.html")) 
 	if err != nil {
@@ -69,6 +70,9 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	db = CreateClient()
+	if err = db.InitDB(); err != nil {
+		log.Panicf("Error initializing database: %v",err)
+	}
 
 	log.Printf("Starting server on https://localhost:%d\n",PORT)
 	// Run server in new goroutine
@@ -114,15 +118,29 @@ func getGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
-	
+	params := r.URL.Query()
+	userName := params.Get("name")
+	w.Header().Set("Content-Type","text/html")
+	_, err := db.CheckAddUser(userName)
+	if err != nil {
+		log.Panic(err)
+		return 
+	}
+	w.Write([]byte("<div>Received user with name: "));
+	w.Write([]byte(userName));
+	w.Write([]byte(", added to db!</div>"));
 }
 
 func handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	name := params.Get("name")
 	w.Header().Set("Content-Type","text/html")
-	// gold := db.GetUserGold(name)
-	w.Write([]byte(fmt.Sprintf("<div>Got name: %s</div>",name)))
+	gold, err := db.GetUserGold(name)
+	if err != nil {
+		w.Write(fmt.Appendf([]byte{},"<div>Got name: %s</div> <div> Gold data unavailable... </div>",name))
+		return
+	}
+	w.Write(fmt.Appendf([]byte{},"<div>Got name: %s</div> <div> Has %d gold... </div>",name,gold))
 }
 
 func handlePlaceBet(w http.ResponseWriter, r *http.Request) {

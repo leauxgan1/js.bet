@@ -10,23 +10,23 @@ import (
 
 templ Game(gameState game.GameState, assets assets.Assets, events eventlog.FighterEventLog) {
 	<div id="game" class="overflow-hidden">
-		<div id="FighterSides" class="flex flex-row justify-around align-around">
+		<div id="fighter-sides" class="flex flex-row justify-around align-around">
 			<div 
-				id="LeftFighterSide" 
+				id="left-fighter-side" 
 				class="flex flex-row h-screen w-6/12 align-evenly justify-around bg-gradient-to-t from-red-200 to-indigo-200 text-white text-center"
 			>
-				<div class="mt-auto flex flex-col w-4/12 h-10/12 justify-evenly align-evenly">
+				<div id="left-fighter-ui" class="mt-auto flex flex-col w-4/12 h-10/12 justify-evenly align-evenly">
 					@FighterStats(gameState.LeftFighter)
 					@Bet(game.LEFT_TO_RIGHT)
 				</div>
 				@FighterIcon(gameState.LeftFighter,true,assets)
 			</div>
 			<div 
-				id="RightFighterSide" 
+				id="right-fighter-side" 
 				class="flex flex-row h-screen w-6/12 align-center justify-around bg-gradient-to-t from-yellow-200 to-blue-200 text-white text-center"
 			>
 				@FighterIcon(gameState.RightFighter,false,assets)
-				<div class="mt-auto flex flex-col w-4/12 h-10/12 justify-evenly align-evenly">
+				<div id="right-fighter-ui" class="mt-auto flex flex-col w-4/12 h-10/12 justify-evenly align-evenly">
 					@FighterStats(gameState.RightFighter)
 					@Bet(game.RIGHT_TO_LEFT)
 				</div>
@@ -45,7 +45,8 @@ templ FighterStats(f game.Fighter) {
 			{ f.Name }
 		</div>
 		<div>
-			Health: { f.Health }
+			Health: 
+			@ProgressBar(f.Health,f.MaxHealth)
 		</div>
 		<div>
 			Damage: { f.Damage } </div>
@@ -53,7 +54,8 @@ templ FighterStats(f game.Fighter) {
 			Speed { f.Speed }
 		</div>
 		<div>
-			Timer: { f.Timer } / { game.DEFAULT_TIMER }
+			Timer: 
+			@ProgressBar(f.Timer,game.DEFAULT_TIMER)
 		</div>
 		<div>
 			Accuracy: { strings.Split(fmt.Sprintf("%f",f.Accuracy * 100),".")[0] }% 
@@ -67,15 +69,19 @@ templ FighterStats(f game.Fighter) {
 templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 	{{
 		var animationName string
-
+		var iconID string
 		wounded := fighter.Health <= fighter.MaxHealth / 2
 		var defaultAnim string = "bounce"
 		if wounded {
 			defaultAnim = "wounded"
 		}
 
-		var dir string = "left"
-		if !left {
+		var dir string
+		if left {
+			iconID = "left-fighter-icon"
+			dir = "left"
+		} else {
+			iconID = "right-fighter-icon"
 			dir = "right"
 		}
 		switch fighter.State {
@@ -92,6 +98,7 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 		}
 	}}
 		<div 
+			id={iconID}
 			class={animationName + " mt-62"} 
 		>
 			@templ.Raw(assets.IconsSvgs[fighter.Name])
@@ -100,7 +107,7 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 
 templ EventLog(f eventlog.FighterEventLog) {
 	<ul
-		id="LogList"
+		id="log-list"
 		class="fixed flex flex-col-reverse align-center justify-center bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black overflow-y-scroll overflow-x-auto"
 	>
 		for _, item := range f.Log {
@@ -145,9 +152,27 @@ templ Bet(side game.InitiativeEnum) {
 		</button>
 	</div>
 }
+
 templ Popup(info string) {
 	<div>
 		<p> {info} </p>
 		<button> Close </button>
 	</div>
+}
+
+templ ProgressBar(curr int, max int) {
+	{{
+		var diff int = max - curr
+	}}
+	<ul 
+		id=""
+		class="bg-white flex flex-row justify-evenly align-evenly"
+	>
+		for _ = range curr {
+			<li class="w-2 h-2 bg-black border-1 border-white"></li>
+		}
+		for _ = range diff {
+			<li class="w-2 h-2 bg-gray-300 border-1 border-white"></li>
+		}
+	</ul>
 }

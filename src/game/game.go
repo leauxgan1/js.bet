@@ -8,6 +8,15 @@ import (
 	"math/rand/v2"
 )
 
+var bets map[string]int = make(map[string]int)
+func setBet(name string, amount int) {
+	bets[name] = amount
+}
+func clearBets() {
+	for k := range bets {
+		delete(bets, k)
+	}
+}
 type Action struct {
 	Direction InitiativeEnum
 	WasHit bool
@@ -94,8 +103,8 @@ func (f *Fighter) Reset() *Fighter {
 var fighterList = [...]Fighter {
 	{
 		Name: "JQuery",
-		Health: 15,
-		MaxHealth: 15,
+		Health: 30,
+		MaxHealth: 30,
 		Damage: 4,
 		Speed: 8,
 		Timer: DEFAULT_TIMER,
@@ -104,8 +113,8 @@ var fighterList = [...]Fighter {
 	},
 	{
 		Name: "React",
-		Health: 10,
-		MaxHealth: 10,
+		Health: 20,
+		MaxHealth: 20,
 		Damage: 5,
 		Speed: 3,
 		Timer: DEFAULT_TIMER,
@@ -114,8 +123,8 @@ var fighterList = [...]Fighter {
 	},
 	{
 		Name: "Svelte",
-		Health: 8,
-		MaxHealth: 8,
+		Health: 16,
+		MaxHealth: 16,
 		Damage: 5,
 		Speed: 7,
 		Timer: DEFAULT_TIMER,
@@ -124,8 +133,8 @@ var fighterList = [...]Fighter {
 	},
 	{
 		Name: "Solid",
-		Health: 8,
-		MaxHealth: 8,
+		Health: 16,
+		MaxHealth: 16,
 		Damage: 6,
 		Speed: 7,
 		Timer: DEFAULT_TIMER,
@@ -134,8 +143,8 @@ var fighterList = [...]Fighter {
 	},
 	{
 		Name: "HTMX",
-		Health: 5,
-		MaxHealth: 5,
+		Health: 10,
+		MaxHealth: 10,
 		Damage: 10,
 		Speed: 8,
 		Timer: DEFAULT_TIMER,
@@ -144,8 +153,8 @@ var fighterList = [...]Fighter {
 	},
 	{
 		Name: "Datastar",
-		Health: 4,
-		MaxHealth: 4,
+		Health: 8,
+		MaxHealth: 8,
 		Damage: 11,
 		Speed: 9,
 		Timer: DEFAULT_TIMER,
@@ -248,7 +257,7 @@ func (f Fighter) CheckCrit() bool {
 }
 
 func (g *GameState) StepGame()  {
-	log.Printf("Game Running on frame %d with log:\n",g.FrameCount)
+	log.Printf("Game Running on frame %d:\n",g.FrameCount)
 	g.FrameCount += 1
 	g.RightFighter.State = READY
 	g.LeftFighter.State = READY
