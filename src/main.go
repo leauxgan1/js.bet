@@ -3,15 +3,15 @@ package main
 import (
 	"code-root/src/assets"
 	"code-root/src/components"
-	"code-root/src/game"
 	"code-root/src/eventlog"
+	"code-root/src/game"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"time"
 	"path/filepath"
-
+	"time"
 
 	datastar "github.com/starfederation/datastar/sdk/go"
 )
@@ -103,15 +103,20 @@ func getGame(w http.ResponseWriter, r *http.Request) {
 	rc := http.NewResponseController(w)
 	sse := datastar.NewSSE(w,r)
 	for {
-		gameRender := components.Game(currentGame,siteAssets,eventlog.EventLog)
-		err := sse.MergeFragmentTempl(gameRender)
+		sides := components.FighterSides(currentGame,siteAssets,eventlog.EventLog)
+		err := sse.MergeFragmentTempl(sides)
 		if err != nil {
-			panic(err)
+			log.Panic(err)
+		}
+		events := components.EventLog(eventlog.EventLog)
+		err = sse.MergeFragmentTempl(events)
+		if err != nil {
+			log.Panic(err)
 		}
 
 		err = rc.SetWriteDeadline(time.Now().Add(time.Second * 5))
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 		time.Sleep(time.Millisecond * 500)
 	}
@@ -143,8 +148,28 @@ func handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
 	w.Write(fmt.Appendf([]byte{},"<div>Got name: %s</div> <div> Has %d gold... </div>",name,gold))
 }
 
+type BetShape struct {
+	BetAmount int `json:"betamount"`
+	BetSide string `json:"betside"`
+}
+
 func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
-	
+	if r.Method != http.MethodPost {
+		return
+	}
+	log.Printf("Body received: %s", r.Body)
+	decoder := json.NewDecoder(r.Body)
+	var betInfo BetShape
+	err := decoder.Decode(&betInfo)
+	if err != nil {
+		log.Panicf("Unable to decode json request: %v",err)
+	}
+	log.Printf("Received amount: %d and side %s",betInfo.BetAmount,betInfo.BetSide)
+	if betInfo.BetSide == "Left" {
+		log.Printf("Bet on left!")
+	} else if betInfo.BetSide == "Right" {
+		log.Printf("Bet on right!")
+	}
 }
 
 

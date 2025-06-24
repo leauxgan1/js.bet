@@ -30,12 +30,11 @@ func (db *DBClient) InitDB() error {
 	dbInitStatement := `
 		CREATE TABLE IF NOT EXISTS Users (
 			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-			email TEXT NOT NULL,
-			name TEXT, 
-			pass TEXT, 
+			name TEXT NOT NULL, 
+			pass TEXT NOT NULL, 
 			gold INTEGER,
 			UNIQUE(id),
-			UNIQUE(email)
+			UNIQUE(name)
 		);
 	`
 	_, err := db.conn.Exec(dbInitStatement)
@@ -85,9 +84,9 @@ func (db *DBClient) ChangeUserGold(name string, difference int) error {
 
 func (db *DBClient) CheckAddUser(name string) (int64, error) {
 	insertStatement := `
-		INSERT INTO Users (name, email, pass, gold) VALUES (?, ?, ?, ?);
+		INSERT INTO Users (name, pass, gold) VALUES (?, ?, ?);
 	`
-	result, err := db.conn.Exec(insertStatement,name,"test@gmail.com",DEFAULT_PASS,DefaultGold)
+	result, err := db.conn.Exec(insertStatement,name,DEFAULT_PASS,DefaultGold)
 	if err != nil {
 		return 0,err
 	}

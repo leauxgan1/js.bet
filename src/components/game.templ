@@ -8,38 +8,29 @@ import (
 	"strings"
 )
 
-templ Game(gameState game.GameState, assets assets.Assets, events eventlog.FighterEventLog) {
-	<div id="game" class="overflow-hidden">
-		<div id="fighter-sides" class="flex flex-row justify-around align-around">
-			<div 
-				id="left-fighter-side" 
-				class="flex flex-row h-screen w-6/12 align-evenly justify-around bg-gradient-to-t from-red-200 to-indigo-200 text-white text-center"
-			>
-				<div id="left-fighter-ui" class="mt-auto flex flex-col w-4/12 h-10/12 justify-evenly align-evenly">
-					@FighterStats(gameState.LeftFighter)
-					@Bet(game.LEFT_TO_RIGHT)
-				</div>
-				@FighterIcon(gameState.LeftFighter,true,assets)
-			</div>
-			<div 
-				id="right-fighter-side" 
-				class="flex flex-row h-screen w-6/12 align-center justify-around bg-gradient-to-t from-yellow-200 to-blue-200 text-white text-center"
-			>
-				@FighterIcon(gameState.RightFighter,false,assets)
-				<div id="right-fighter-ui" class="mt-auto flex flex-col w-4/12 h-10/12 justify-evenly align-evenly">
-					@FighterStats(gameState.RightFighter)
-					@Bet(game.RIGHT_TO_LEFT)
-				</div>
-			</div>
+templ FighterSides(gameState game.GameState, assets assets.Assets, events eventlog.FighterEventLog) {
+	<div id="fighter-sides" class="flex flex-row justify-around align-around">
+		<div 
+			id="left-fighter-side" 
+			class="flex flex-row h-screen w-6/12 align-center justify-evenly bg-gradient-to-t from-red-200 to-indigo-200 text-white text-center"
+		>
+			@FighterStats(gameState.LeftFighter)
+			@FighterIcon(gameState.LeftFighter,true,assets)
 		</div>
-		@EventLog(events)
+		<div 
+			id="right-fighter-side" 
+			class="flex flex-row h-screen w-6/12 align-center justify-evenly bg-gradient-to-t from-yellow-200 to-blue-200 text-white text-center"
+		>
+			@FighterIcon(gameState.RightFighter,false,assets)
+			@FighterStats(gameState.RightFighter)
+		</div>
 	</div>
 }
 
 templ FighterStats(f game.Fighter) {
 	<div 
 		id={"FighterInner" + f.Name} 
-		class="m-auto flex flex-col align-center justify-center w-10/12 h-6/12 bg-gray-400 border border-4 border-black "
+		class="mt-32 flex flex-col align-center justify-center w-4/12 h-5/12 bg-gray-400 border border-4 border-black "
 	>
 		<div>
 			{ f.Name }
@@ -107,7 +98,7 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 
 templ EventLog(f eventlog.FighterEventLog) {
 	<ul
-		id="log-list"
+		id="eventlog"
 		class="fixed flex flex-col-reverse align-center justify-center bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black overflow-y-scroll overflow-x-auto"
 	>
 		for _, item := range f.Log {
@@ -120,37 +111,6 @@ templ EventInner(text string) {
 	<li>
 		{text}
 	</li>
-}
-
-templ Bet(side game.InitiativeEnum) {
-	{{
-		var betID string
-		var requestText string
-		var betTitle string
-		if side == game.LEFT_TO_RIGHT {
-			requestText = "@post('/placeBet/left/$betamount');console.log('sent bet!');"
-			betID = "leftBetButton"
-			betTitle = "Left"
-		} else {
-			requestText = "@post('/placeBet/right/$betamount;console.log('sent bet!');')"
-			betID = "rightBetButton"
-			betTitle = "Right"
-		}
-	}}
-	<div 
-		id={betID}
-		class="m-auto flex flex-col align-center justify-evenly w-10/12 h-3/12 bg-blue-400 border-6 border-color-black"
-	>
-		<div> Bet on {betTitle}! </div>
-		<input class="text-center border-4 border-color-white" value="10" type="number" data-bind-betamount></input>
-		<button 
-			class="hover:bg-blue-300 hover:border-blue-600 hover:transition-colors transition-colors hover:ease-in-out bg-blue-500 border-4 border-white rounded" 
-			type="button" 
-			data-on-click={requestText}
-		>
-			Place Bet
-		</button>
-	</div>
 }
 
 templ Popup(info string) {
