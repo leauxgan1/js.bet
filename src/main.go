@@ -113,6 +113,11 @@ func getGame(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Panic(err)
 		}
+		// audio := components.AudioPlayer()
+		// err = sse.MergeFragmentTempl(audio)
+		// if err != nil {
+		// 	log.Panic(err)
+		// }
 
 		err = rc.SetWriteDeadline(time.Now().Add(time.Second * 5))
 		if err != nil {

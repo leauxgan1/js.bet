@@ -9,6 +9,9 @@ import (
 )
 
 templ FighterSides(gameState game.GameState, assets assets.Assets, events eventlog.FighterEventLog) {
+	{{
+		var shouldPlay bool = gameState.FrameCount % 3 == 0
+	}}
 	<div id="fighter-sides" class="flex flex-row justify-around align-around">
 		<div 
 			id="left-fighter-side" 
@@ -24,6 +27,9 @@ templ FighterSides(gameState game.GameState, assets assets.Assets, events eventl
 			@FighterIcon(gameState.RightFighter,false,assets)
 			@FighterStats(gameState.RightFighter)
 		</div>
+		if shouldPlay {
+			@AudioPlayer()
+		}
 	</div>
 }
 
@@ -55,6 +61,12 @@ templ FighterStats(f game.Fighter) {
 			Crit: { strings.Split(fmt.Sprintf("%f",f.CritRate * 100),".")[0] }% 
 		</div>
 	</div>
+}
+
+templ AudioPlayer() {
+	<audio id="complete-player" autoplay>
+		<source src="./audio/gmae.wav" type="audio/wav">
+	</audio>
 }
 
 templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
