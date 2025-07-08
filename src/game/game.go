@@ -29,6 +29,7 @@ type GameState struct {
 	Winner WinnerEnum
 	FrameCount int
 	LastAction Action
+	ShouldPlay bool
 }
 
 func New() GameState {
@@ -200,6 +201,7 @@ const (
 
 func (g *GameState) Act(initiative InitiativeEnum)  {
 	var crit bool
+	g.ShouldPlay = true
 	if initiative == LEFT_TO_RIGHT {
 		g.LeftFighter.Timer = DEFAULT_TIMER
 		
@@ -262,6 +264,7 @@ func (g *GameState) StepGame()  {
 	g.RightFighter.State = READY
 	g.LeftFighter.State = READY
 
+	g.ShouldPlay = false
 	// Check for a non-positive health, choose a winner and keep them in the game for the next round
 	if(g.LeftFighter.Health <= 0 && g.RightFighter.Health <= 0) {
 		if g.LeftFighter.Health == g.RightFighter.Health {

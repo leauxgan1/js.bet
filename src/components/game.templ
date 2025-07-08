@@ -9,9 +9,6 @@ import (
 )
 
 templ FighterSides(gameState game.GameState, assets assets.Assets, events eventlog.FighterEventLog) {
-	{{
-		var shouldPlay bool = gameState.FrameCount % 3 == 0
-	}}
 	<div id="fighter-sides" class="flex flex-row justify-around align-around">
 		<div 
 			id="left-fighter-side" 
@@ -27,9 +24,6 @@ templ FighterSides(gameState game.GameState, assets assets.Assets, events eventl
 			@FighterIcon(gameState.RightFighter,false,assets)
 			@FighterStats(gameState.RightFighter)
 		</div>
-		if shouldPlay {
-			@AudioPlayer()
-		}
 	</div>
 }
 
@@ -61,12 +55,6 @@ templ FighterStats(f game.Fighter) {
 			Crit: { strings.Split(fmt.Sprintf("%f",f.CritRate * 100),".")[0] }% 
 		</div>
 	</div>
-}
-
-templ AudioPlayer() {
-	<audio id="complete-player" autoplay>
-		<source src="./audio/gmae.wav" type="audio/wav">
-	</audio>
 }
 
 templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
@@ -147,4 +135,35 @@ templ ProgressBar(curr int, max int) {
 			<li class="w-2 h-2 bg-gray-300 border-1 border-white"></li>
 		}
 	</ul>
+}
+
+templ PopupSignup() {
+	<div 
+		id="popup" 
+		class="bg-gray-300 z-10 flex justify-center align-center fixed w-8/12 h-8/12 top-1/4 left-1/4"
+	>
+		<h1> Sign up for JS.bet </h1>
+		<form>
+			<input type="text" name="username">
+			<input type="text" name="password">
+			<button type="button" data-on-click="@post('/user/signup','{contentType:'form'}')"></button>
+		</form>
+	</div>
+}
+templ PopupLogin() {
+	<div 
+		id="popup" 
+		class="bg-gray-300 z-10 flex justify-center align-center fixed w-8/12 h-8/12 top-1/4 left-1/4"
+	>
+		<h1> Log in to JS.bet </h1>
+		<form>
+			<input type="text" name="username">
+			<input type="text" name="password">
+			<button type="button" data-on-click="@post('/user/signup','{contentType:'form'}')"></button>
+		</form>
+	</div>
+}
+
+templ PopupHidden() {
+	<div id="popup" hidden ></div>
 }

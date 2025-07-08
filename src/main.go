@@ -45,7 +45,9 @@ func main() {
 	// Handlers
 	// mux.HandleFunc("/", homepageHandler)
 	mux.HandleFunc("/game/", getGame)
-	mux.HandleFunc("/user/new/", handleLoginRequest)
+	mux.HandleFunc("/user/signup", handleSignupRequest)
+	mux.HandleFunc("/user/new/", handleNewUserRequest)
+	mux.HandleFunc("/user/login/", handleLoginRequest)
 	mux.HandleFunc("/user/gold/", handleGetUserInfo)
 	mux.HandleFunc("/placeBet/", handlePlaceBet)
 
@@ -113,12 +115,16 @@ func getGame(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Panic(err)
 		}
-		// audio := components.AudioPlayer()
-		// err = sse.MergeFragmentTempl(audio)
-		// if err != nil {
-		// 	log.Panic(err)
-		// }
-
+		if currentGame.ShouldPlay  {
+			err = sse.ExecuteScript("document.querySelector('#attack-player').play();")
+			if err != nil {
+				log.Panic("Unable to play audio via execute script")
+			}
+			err = sse.ExecuteScript("console.log('just ran script from D*!');")
+			if err != nil {
+				log.Panic("Unable to play audio via execute script")
+			}
+		}
 		err = rc.SetWriteDeadline(time.Now().Add(time.Second * 5))
 		if err != nil {
 			log.Panic(err)
@@ -139,6 +145,39 @@ func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("<div>Received user with name: "));
 	w.Write([]byte(userName));
 	w.Write([]byte(", added to db!</div>"));
+}
+
+func handleNewUserRequest(w http.ResponseWriter, r *http.Request) {
+	// On a POST request, accept a username an password as params, santitize them, and if unique, add them as a new user to the database
+	if r.Method != http.MethodPost {
+		log.Panic("Incorrect method for endpoint 'user/signup', expected GET");
+		return;
+	}
+	params := r.URL.Query()
+	userName := params.Get("name")
+	w.Header().Set("Content-Type","text/html")
+	_, err := db.CheckAddUser(userName)
+	if err != nil {
+		log.Panic(err)
+		return 
+	}
+	w.Write([]byte("<div>Received user with name: "));
+	w.Write([]byte(userName));
+	w.Write([]byte(", added to db!</div>"));
+}
+
+func handleSignupRequest(w http.ResponseWriter, r *http.Request) {
+	// On a GET request, send a signup popup gui to the user
+	if r.Method != http.MethodGet {
+		log.Panic("Incorrect method for endpoint 'user/signup', expected GET")
+		return
+	}
+	sse := datastar.NewSSE(w,r)
+	err := sse.MergeFragmentTempl(components.PopupSignup())
+	if err != nil {
+		log.Panic(err)
+		return 
+	}
 }
 
 func handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
@@ -176,6 +215,3 @@ func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Bet on right!")
 	}
 }
-
-
-
