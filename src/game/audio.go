@@ -4,37 +4,60 @@ import (
 	"fmt"
 )
 
-type AudioID int 
-const (
-	_ = iota
-	AUDIO_ATTACK
-	AUDIO_BLOCK
-	AUDIO_DODGE
-	AUDIO_CRIT
-)
+/// Audio struct where true players will play and false will be reset each update
+type AudioPlayer struct {
+	AttackPlaying bool
+	BlockPlaying bool
+	DodgePlaying bool
+	CritPlaying bool
+	WinnerPlaying bool
+}
 
-func FormatAudioPlayer(id AudioID) string {
-	switch id {
-		case AUDIO_ATTACK:
-			return "attack_player"
-		case AUDIO_BLOCK:
-			return "block_player"
-		case AUDIO_DODGE:
-			return "dodge_player"
-		case AUDIO_CRIT:
-			return "crit_player"
+func (a *AudioPlayer) Stop() {
+	a.AttackPlaying = false
+	a.BlockPlaying = false
+	a.DodgePlaying = false
+	a.CritPlaying = false
+	a.WinnerPlaying = false
+}
+
+// TODO make this a for loop
+/// Convert audioplayer state into javascript able to be executed from the server, in which all on players play and all off players stop and reset
+func (a AudioPlayer) FormatAudioPlayer() string {
+	var command string = ""
+	if a.AttackPlaying == true {
+		command += FormatAudioPlayCommand("attack-player")
+	} else {
+		command += FormatAudioStopCommand("attack-player")
 	}
-	return ""
-}
-
-func FormatAudioCommand(id AudioID) string {
-	return fmt.Sprintf("document.querySelector('#%s').play();", FormatAudioPlayer(id))
-}
-
-func FormatStopAllAudio() string {
-	var finalCommand = ""
-	for i := range AUDIO_CRIT {
-		finalCommand += fmt.Sprintf("let sound = document.querySelector('#%s); sound.pause(); sound.currentTime = 0;",FormatAudioPlayer(AudioID(i)))
+	if a.BlockPlaying == true {
+		command += FormatAudioPlayCommand("block-player")
+	} else {
+		command += FormatAudioStopCommand("block-player")
 	}
-	return finalCommand
+	if a.DodgePlaying == true {
+		command += FormatAudioPlayCommand("dodge-player")
+	} else {
+		command += FormatAudioStopCommand("dodge-player")
+	}
+	if a.CritPlaying == true {
+		command += FormatAudioPlayCommand("crit-player")
+	} else {
+		command += FormatAudioStopCommand("crit-player")
+	}
+	if a.WinnerPlaying == true {
+		command += FormatAudioPlayCommand("winner-player")
+	} else {
+		command += FormatAudioStopCommand("winner-player")
+	}
+	return command
 }
+
+func FormatAudioPlayCommand(id string) string {
+	return fmt.Sprintf("document.querySelector('#%s').play();",id) 
+}
+
+func FormatAudioStopCommand(id string) string {
+	return fmt.Sprintf("var p = document.querySelector('#%s');p.pause();p.currentTime = 0;",id) 
+}
+

@@ -115,15 +115,10 @@ func getGame(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Panic(err)
 		}
-		if currentGame.ShouldPlay  {
-			err = sse.ExecuteScript("document.querySelector('#attack-player').play();")
-			if err != nil {
-				log.Panic("Unable to play audio via execute script")
-			}
-			err = sse.ExecuteScript("console.log('just ran script from D*!');")
-			if err != nil {
-				log.Panic("Unable to play audio via execute script")
-			}
+		commands := currentGame.AudioPlayers.FormatAudioPlayer() // Get current audio command based on game state
+		err = sse.ExecuteScript(commands)
+		if err != nil {
+			log.Panic("Unable to play audio via execute script")
 		}
 		err = rc.SetWriteDeadline(time.Now().Add(time.Second * 5))
 		if err != nil {

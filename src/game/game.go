@@ -12,11 +12,13 @@ var bets map[string]int = make(map[string]int)
 func setBet(name string, amount int) {
 	bets[name] = amount
 }
+
 func clearBets() {
 	for k := range bets {
 		delete(bets, k)
 	}
 }
+
 type Action struct {
 	Direction InitiativeEnum
 	WasHit bool
@@ -29,7 +31,7 @@ type GameState struct {
 	Winner WinnerEnum
 	FrameCount int
 	LastAction Action
-	ShouldPlay bool
+	AudioPlayers AudioPlayer
 }
 
 func New() GameState {
@@ -44,6 +46,7 @@ func New() GameState {
 		Winner: NEITHER,
 	}
 }
+
 func (g *GameState) ResetKeepWinner() {
 	if g.Winner == LEFT {
 		g.LeftFighter.Reset()
@@ -200,21 +203,25 @@ const (
 )
 
 func (g *GameState) Act(initiative InitiativeEnum)  {
-	var crit bool
-	g.ShouldPlay = true
+	var crit bool = false
 	if initiative == LEFT_TO_RIGHT {
 		g.LeftFighter.Timer = DEFAULT_TIMER
-		
+
 		hit := g.LeftFighter.CheckHit()
 		damage := g.LeftFighter.Damage
 		g.LeftFighter.State = ATTACKING
+		g.AudioPlayers.AttackPlaying = true
 		if !hit {
+			g.AudioPlayers.DodgePlaying = true
 			eventlog.EventLog.Write(fmt.Sprintf("%s just missed...",g.LeftFighter.Name))
 			return
 		}
 		g.RightFighter.State = DEFENDING
+		g.AudioPlayers.BlockPlaying = true
 		crit = g.LeftFighter.CheckCrit()
 		if crit {
+			g.AudioPlayers.AttackPlaying = false
+			g.AudioPlayers.CritPlaying = true
 			damage *= 2.0
 			g.LeftFighter.State = CRITTING
 			eventlog.EventLog.Write(fmt.Sprintf("%s just crit %s for %d",g.LeftFighter.Name,g.RightFighter.Name,damage))
@@ -228,13 +235,18 @@ func (g *GameState) Act(initiative InitiativeEnum)  {
 		hit := g.RightFighter.CheckHit()
 		damage := g.LeftFighter.Damage
 		g.RightFighter.State = ATTACKING
+		g.AudioPlayers.AttackPlaying = true
 		if !hit {
+			g.AudioPlayers.DodgePlaying = true
 			eventlog.EventLog.Write(fmt.Sprintf("%s just missed...",g.RightFighter.Name))
 			return
 		}
 		g.LeftFighter.State = DEFENDING
+		g.AudioPlayers.BlockPlaying = true
 		crit = g.LeftFighter.CheckCrit()
 		if crit {
+			g.AudioPlayers.AttackPlaying = false
+			g.AudioPlayers.CritPlaying = true
 			damage *= 2.0
 			g.RightFighter.State = CRITTING
 			eventlog.EventLog.Write(fmt.Sprintf("%s just crit %s for %d",g.RightFighter.Name,g.LeftFighter.Name,damage))
@@ -258,30 +270,32 @@ func (f Fighter) CheckCrit() bool {
 	return false
 }
 
+// TODO add sound for winner being determined
+func determineWinner(left Fighter, right Fighter) WinnerEnum {
+	if(left.Health <= 0 && right.Health <= 0) {
+		if left.Health < right.Health {
+			return RIGHT
+		} else {
+			return LEFT
+		}
+	} else if (left.Health <= 0) {
+		return RIGHT
+	} else if (right.Health <= 0) {
+		return LEFT
+	}
+	return NEITHER
+}
+
 func (g *GameState) StepGame()  {
-	log.Printf("Game Running on frame %d:\n",g.FrameCount)
+	// log.Printf("Game Running on frame %d:\n",g.FrameCount)
 	g.FrameCount += 1
 	g.RightFighter.State = READY
 	g.LeftFighter.State = READY
-
-	g.ShouldPlay = false
+	g.AudioPlayers.Stop()
 	// Check for a non-positive health, choose a winner and keep them in the game for the next round
-	if(g.LeftFighter.Health <= 0 && g.RightFighter.Health <= 0) {
-		if g.LeftFighter.Health == g.RightFighter.Health {
-			g.Winner = NEITHER
-		} else if g.LeftFighter.Health < g.RightFighter.Health {
-			g.Winner = RIGHT
-		} else {
-			g.Winner = LEFT
-		}
-		g.ResetKeepWinner()
-		return
-	} else if (g.LeftFighter.Health <= 0) {
-		g.Winner = RIGHT
-		g.ResetKeepWinner()
-		return
-	} else if (g.RightFighter.Health <= 0) {
-		g.Winner = LEFT
+	var winner WinnerEnum = determineWinner(g.LeftFighter,g.RightFighter)
+	if winner == LEFT || winner == RIGHT {
+		g.Winner = winner
 		g.ResetKeepWinner()
 		return
 	}
@@ -289,14 +303,12 @@ func (g *GameState) StepGame()  {
 	lReady := g.LeftFighter.Timer <= 0
 	rReady := g.RightFighter.Timer <= 0
 	if lReady && rReady {
-		// Choose lesser Timer when both ready, higher speed on ties
-		if g.LeftFighter.Timer == g.RightFighter.Timer {
-			// Choose randomly on second tie
+		if g.LeftFighter.Timer == g.RightFighter.Timer { // Choose lesser Timer when both ready, higher speed on ties
 			if g.LeftFighter.Speed == g.RightFighter.Speed {
-				rand := rand.Float32()
+				rand := rand.Float32() // Choose randomly on second tie
 				if rand < 0.5 { // Left fighter acts
 					g.Act(LEFT_TO_RIGHT)
-				} else { // Right fighter acts
+				} else {        // Right fighter acts
 					g.Act(RIGHT_TO_LEFT)
 				}
 			} else if g.LeftFighter.Speed > g.RightFighter.Speed { 
