@@ -5,20 +5,38 @@
   <!--<link href="./styles/output.css" type="text/css" rel="stylesheet">-->
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link href="./styles/animations.css" type="text/css" rel="stylesheet">
-  <script type="module" defer
-    src="https://cdn.jsdelivr.net/gh/starfederation/datastar@develop/bundles/datastar.js"></script>
+  <script type="module" defer src="https://cdn.jsdelivr.net/gh/starfederation/datastar@develop/bundles/datastar.js"></script>
 </head>
 
 <body data-on-load="@get('/game')"
   class="bg-black text-white flex text-center flex-col align-center justify-center gap-2 m-0 p-0">
-  <h1 class="bg-black text-4xl fixed w-screen top-0 py-1"> Welcome to Js.Bet! </h1>
+	<div id="top" class=" flex flex-row bg-black fixed w-screen top-0 py-1 justify-center align-center">
+		<h1 class="text-4xl">Welcome to Js.Bet!</h1>
+		<button type="button" data-on-click="@get('/user/signup')"> Signup</button>
+		<button type="button" data-on-click="@get('/user/login')"> Login</button>
+	</div>
 	<div id="game" class="overflow-hidden">
 		<div id="fighter-sides" class="flex flex-row justify-around align-around"></div>
 		<div id="eventlog"></div>
 	</div>
-	<audio id="complete-player" autoplay>
-		<source src="./audio/gmae.wav" type="audio/wav">
-	</audio>
+	<div id="audio-players">
+		<audio id="attack-player">
+			<source src="./audio/attack.wav" type="audio/wav">
+		</audio>
+		<audio id="block-player">
+			<source src="./audio/block.wav"  type="audio/wav">
+		</audio>
+		<audio id="dodge-player">
+			<source src="./audio/dodge.wav"  type="audio/wav">
+		</audio>
+		<audio id="crit-player">
+			<source src="./audio/crit.wav"   type="audio/wav">
+		</audio>
+		<audio id="winner-player">
+			<source src="./audio/winner.wav" type="audio/wav">
+		</audio>
+	</div>
+	<div id="popup" hidden ></div>
 	<div 
 		id="left-bet"
 		class="m-auto flex flex-col align-center justify-evenly fixed top-8/12 left-1/12 w-2/12 h-3/12 bg-blue-400 border-6 border-color-black"
@@ -33,9 +51,7 @@
 				placeholder="10" 
 				type="number" 
 			>
-			<button 
-				class="hover:bg-blue-300 hover:border-blue-600 hover:transition-colors transition-colors hover:ease-in-out bg-blue-500 border-4 border-white rounded" 
-			>
+			<button class="hover:bg-blue-300 hover:border-blue-600 hover:transition-colors transition-colors hover:ease-in-out bg-blue-500 border-4 border-white rounded">
 				Place Bet
 			</button>
 		</form>
