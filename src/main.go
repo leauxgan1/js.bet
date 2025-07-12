@@ -12,8 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
-	datastar "github.com/starfederation/datastar/sdk/go"
+	
+	datastar "github.com/starfederation/datastar/sdk/go/datastar"
 )
 
 const (
@@ -40,16 +40,15 @@ func main() {
 	fileServer = http.FileServer(http.Dir(staticPath))
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", homepageHandler)
 
 	// Handlers
-	// mux.HandleFunc("/", homepageHandler)
+	mux.HandleFunc("/", homepageHandler)
 	mux.HandleFunc("/game/", getGame)
-	mux.HandleFunc("/user/signup", handleSignupRequest)
-	mux.HandleFunc("/user/new/", handleNewUserRequest)
-	mux.HandleFunc("/user/login/", handleLoginRequest)
-	mux.HandleFunc("/user/gold/", handleGetUserInfo)
-	mux.HandleFunc("/placeBet/", handlePlaceBet)
+	// mux.HandleFunc("/user/signup", handleSignupRequest)
+	// mux.HandleFunc("/user/new", handleNewUserRequest)
+	// mux.HandleFunc("/user/login", handleLoginRequest)
+	// mux.HandleFunc("/user/gold", handleGetUserInfo)
+	// mux.HandleFunc("/placeBet", handlePlaceBet)
 
 	dir, err := os.ReadFile(filepath.Join(staticPath,"homepage.html")) 
 	if err != nil {
@@ -77,13 +76,13 @@ func main() {
 	}
 
 	log.Printf("Starting server on https://localhost:%d\n",PORT)
+
 	// Run server in new goroutine
-	runServer := func() {
+	go func() {
 		if err :=	s.ListenAndServe(); err != nil {
 			log.Panic(err)
 		}
-	}
-	go runServer()
+	}()
 
 	// Start first game and run until server closes
 	currentGame = game.New()
@@ -105,26 +104,28 @@ func getGame(w http.ResponseWriter, r *http.Request) {
 	rc := http.NewResponseController(w)
 	sse := datastar.NewSSE(w,r)
 	for {
-		sides := components.FighterSides(currentGame,siteAssets,eventlog.EventLog)
-		err := sse.MergeFragmentTempl(sides)
+		log.Print("/game/ reached!")
+		sides := components.FighterSides(currentGame,siteAssets)
+		err := sse.PatchElementTempl(sides)
 		if err != nil {
 			log.Panic(err)
 		}
 		events := components.EventLog(eventlog.EventLog)
-		err = sse.MergeFragmentTempl(events)
+		err = sse.PatchElementTempl(events)
 		if err != nil {
 			log.Panic(err)
 		}
 		commands := currentGame.AudioPlayers.FormatAudioPlayer() // Get current audio command based on game state
 		err = sse.ExecuteScript(commands)
 		if err != nil {
-			log.Panic("Unable to play audio via execute script")
+			http.Error(w,"Unable to play audio via execute script", 500)
+			continue
 		}
 		err = rc.SetWriteDeadline(time.Now().Add(time.Second * 5))
 		if err != nil {
 			log.Panic(err)
 		}
-		time.Sleep(time.Millisecond * 500)
+		time.Sleep(time.Second)
 	}
 }
 
@@ -168,7 +169,7 @@ func handleSignupRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sse := datastar.NewSSE(w,r)
-	err := sse.MergeFragmentTempl(components.PopupSignup())
+	err := sse.PatchElementTempl(components.PopupSignup())
 	if err != nil {
 		log.Panic(err)
 		return 

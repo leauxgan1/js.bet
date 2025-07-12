@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-templ FighterSides(gameState game.GameState, assets assets.Assets, events eventlog.FighterEventLog) {
+templ FighterSides(gameState game.GameState, assets assets.Assets) {
 	<div id="fighter-sides" class="flex flex-row justify-around align-around">
 		<div 
 			id="left-fighter-side" 
@@ -30,7 +30,7 @@ templ FighterSides(gameState game.GameState, assets assets.Assets, events eventl
 templ FighterStats(f game.Fighter) {
 	<div 
 		id={"FighterInner" + f.Name} 
-		class="mt-32 flex flex-col align-center justify-center w-4/12 h-5/12 bg-gray-400 border border-4 border-black "
+		class="mt-42 flex flex-col align-center justify-center w-4/12 h-4/12 bg-gray-400 border border-4 border-black rounded-md "
 	>
 		<div>
 			{ f.Name }
@@ -90,7 +90,7 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 	}}
 		<div 
 			id={iconID}
-			class={animationName + " mt-62"} 
+			class={animationName + " mt-52"} 
 		>
 			@templ.Raw(assets.IconsSvgs[fighter.Name])
 		</div>
@@ -99,18 +99,14 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 templ EventLog(f eventlog.FighterEventLog) {
 	<ul
 		id="eventlog"
-		class="fixed flex flex-col-reverse align-center justify-center bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black overflow-y-scroll overflow-x-auto"
+		class="fixed flex flex-col-reverse align-center justify-center bg-blue-300 left-4/12 bottom-1/12 w-4/12 h-2/12 border-10 border-color-black overflow-y-scroll overflow-x-auto rounded-md"
 	>
 		for _, item := range f.Log {
-			@EventInner(item)
+			<li>
+				{item}
+			</li>
 		}
 	</ul>
-}
-
-templ EventInner(text string) {
-	<li>
-		{text}
-	</li>
 }
 
 templ Popup(info string) {

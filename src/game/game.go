@@ -210,11 +210,12 @@ func (g *GameState) Act(initiative InitiativeEnum)  {
 		hit := g.LeftFighter.CheckHit()
 		damage := g.LeftFighter.Damage
 		g.LeftFighter.State = ATTACKING
-		g.AudioPlayers.AttackPlaying = true
 		if !hit {
 			g.AudioPlayers.DodgePlaying = true
 			eventlog.EventLog.Write(fmt.Sprintf("%s just missed...",g.LeftFighter.Name))
 			return
+		} else {
+			g.AudioPlayers.AttackPlaying = true
 		}
 		g.RightFighter.State = DEFENDING
 		g.AudioPlayers.BlockPlaying = true
@@ -235,12 +236,14 @@ func (g *GameState) Act(initiative InitiativeEnum)  {
 		hit := g.RightFighter.CheckHit()
 		damage := g.LeftFighter.Damage
 		g.RightFighter.State = ATTACKING
-		g.AudioPlayers.AttackPlaying = true
 		if !hit {
 			g.AudioPlayers.DodgePlaying = true
 			eventlog.EventLog.Write(fmt.Sprintf("%s just missed...",g.RightFighter.Name))
 			return
+		} else {
+			g.AudioPlayers.AttackPlaying = true
 		}
+
 		g.LeftFighter.State = DEFENDING
 		g.AudioPlayers.BlockPlaying = true
 		crit = g.LeftFighter.CheckCrit()
