@@ -1,0 +1,78 @@
+@import "https://unpkg.com/open-props";
+@import "https://unpkg.com/open-props/normalize.min.css";
+@import "https://unpkg.com/open-props/buttons.min.css";
+
+:root {
+  --primary: hsl(200 100% 50%);
+  --secondary: hsl(200 80% 80%);
+  --tertiary: hsl(200 80% 20%);
+
+  --text-color: #fff;
+  --button-color: #55ccff;
+}
+
+body {
+  display: grid;
+  place-content: center;
+  /* padding: var(--size-7); */
+  /* gap: var(--size-7); */
+  background: var(--tertiary);
+  color: var(--text-color);
+}
+
+
+button {
+  border-radius: 8px;
+  border: 4px solid var(--secondary);
+  background: var(--button-color);
+  transition: border-color 0.5s;
+  transition-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+
+
+
+
+nav {
+  inset: 0;
+  position: fixed;
+  background: var(--gray-6);
+  height: var(--size-10);
+  top: 0;
+  width: 100%;
+  height: 5em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+
+  >button {
+    margin-inline: 1em;
+  }
+
+  h1 {
+    top: 0;
+    z-index: 1;
+    border: var(--border-size-2) solid white;
+    box-sizing: border-box;
+    place-self: center;
+    border-radius: var(--radius-3);
+    padding: var(--size-1);
+    font-size: var(--size-relative-8);
+    white-space: nowrap;
+    overflow: hide;
+  }
+
+}
+
+#left-bet {
+  position: fixed;
+  top: 80%;
+  left: 10%;
+}
+
+#right-bet {
+  position: fixed;
+  top: 80%;
+  left: 60%;
+}

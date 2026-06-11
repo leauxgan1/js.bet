@@ -1,15 +1,15 @@
 package main
 
 import (
-	"log"
-
 	"database/sql"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 const DefaultGold = 20
 const DEFAULT_PASS = "EASILYGUESSABLE"
+
 var lastID = 0
 
 type DBClient struct {
@@ -21,7 +21,7 @@ func CreateClient() DBClient {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return DBClient {
+	return DBClient{
 		conn: db,
 	}
 }
@@ -71,12 +71,12 @@ func (db *DBClient) ChangeUserGold(name string, difference int) error {
 	if err != nil {
 		return err
 	}
-	statement,err := transaction.Prepare(updateStatement)
+	statement, err := transaction.Prepare(updateStatement)
 	if err != nil {
 		return err
 	}
-	_, err = statement.Exec(difference,name)
-	if err != nil  {
+	_, err = statement.Exec(difference, name)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -86,15 +86,13 @@ func (db *DBClient) CheckAddUser(name string) (int64, error) {
 	insertStatement := `
 		INSERT INTO Users (name, pass, gold) VALUES (?, ?, ?);
 	`
-	result, err := db.conn.Exec(insertStatement,name,DEFAULT_PASS,DefaultGold)
+	result, err := db.conn.Exec(insertStatement, name, DEFAULT_PASS, DefaultGold)
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0,err
+		return 0, err
 	}
 	return id, nil
 }
-
-
