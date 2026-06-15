@@ -4,12 +4,12 @@ import (
 	"fmt"
 )
 
-/// Audio struct where true players will play and false will be reset each update
+// / Audio struct where true players will play and false will be reset each update
 type AudioPlayer struct {
 	AttackPlaying bool
-	BlockPlaying bool
-	DodgePlaying bool
-	CritPlaying bool
+	BlockPlaying  bool
+	DodgePlaying  bool
+	CritPlaying   bool
 	WinnerPlaying bool
 }
 
@@ -22,7 +22,7 @@ func (a *AudioPlayer) Stop() {
 }
 
 // TODO make this a for loop
-/// Convert audioplayer state into javascript able to be executed from the server, in which all on players play and all off players stop and reset
+// / Convert audioplayer state into javascript able to be executed from the server, in which all on players play and all off players stop and reset
 func (a AudioPlayer) FormatAudioPlayer() string {
 	var command string = ""
 	if a.AttackPlaying == true {
@@ -54,10 +54,9 @@ func (a AudioPlayer) FormatAudioPlayer() string {
 }
 
 func FormatAudioPlayCommand(id string) string {
-	return fmt.Sprintf("document.querySelector('#%s').play();",id) 
+	return fmt.Sprintf("document.querySelector('#%s').play();", id)
 }
 
 func FormatAudioStopCommand(id string) string {
-	return fmt.Sprintf("var p = document.querySelector('#%s');p.pause();p.currentTime = 0;",id) 
+	return fmt.Sprintf("var p = document.querySelector('#%s');p.pause();p.currentTime = 0;", id)
 }
-

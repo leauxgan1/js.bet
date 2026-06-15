@@ -3,4 +3,4 @@ node_modules/
 .envrc
 *.db
 notes.md
-out/
+bin/

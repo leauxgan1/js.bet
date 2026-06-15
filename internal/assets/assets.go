@@ -12,7 +12,7 @@ type Assets struct {
 }
 
 func New() Assets {
-	newAssets := Assets {
+	newAssets := Assets{
 		IconsSvgs: make(map[string]string),
 	}
 	return newAssets
@@ -24,12 +24,12 @@ func (a *Assets) ReadIcons(iconsDirPath string) {
 		log.Panic(err)
 	}
 
-	for i := range(len(icons)) {
+	for i := range len(icons) {
 		icon := icons[i]
 		name := icon.Name()
-		cleanName := strings.TrimSuffix(name,".svg")
-		path := fmt.Sprintf("../static/icons/%s",name)
-		bytes,err := os.ReadFile(path)
+		cleanName := strings.TrimSuffix(name, ".svg")
+		path := fmt.Sprintf("./static/icons/%s", name)
+		bytes, err := os.ReadFile(path)
 		if err != nil {
 			log.Panic(err)
 		}

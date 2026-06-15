@@ -1,20 +1,27 @@
-package main
+package internal
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"js-bet/src/assets"
-	"js-bet/src/components"
-	"js-bet/src/eventlog"
-	"js-bet/src/game"
+	"strings"
+
+	// "io"
+
+	"compress/gzip"
+	"js-bet/internal/assets"
+	"js-bet/internal/components"
+	"js-bet/internal/eventlog"
+	"js-bet/internal/game"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
-	// "github.com/a-h/templ"
-	// datastar "github.com/starfederation/datastar/sdk/go/datastar"
+
+	"github.com/andybalholm/brotli"
 )
 
 const (
@@ -29,33 +36,33 @@ var db DBClient
 var basePath string
 var staticPath string
 
-func main() {
+var sseHub *Hub
+
+func StartServer() {
+	// Get access to the filesystem
 	projectRoot, err := os.Getwd()
+	log.Print(projectRoot)
 	if err != nil {
 		log.Panic(err)
 	}
-	projectRoot = filepath.Dir(projectRoot)
 	staticPath = filepath.Join(projectRoot, "static")
-
 	fileServer := http.FileServer(http.Dir(staticPath))
 
+	// Create new server Handler
 	mux := http.NewServeMux()
-
-	// Handlers
 	mux.Handle("/", fileServer)
-	// mux.HandleFunc("/", homepageHandler)
 	mux.HandleFunc("/game/", getGame)
+	// mux.HandleFunc("/", homepageHandler)
 	// mux.HandleFunc("/user/signup", handleSignupRequest)
 	// mux.HandleFunc("/user/new", handleNewUserRequest)
 	// mux.HandleFunc("/user/login", handleLoginRequest)
 	// mux.HandleFunc("/user/gold", handleGetUserInfo)
 	// mux.HandleFunc("/placeBet", handlePlaceBet)
 
-	dir, err := os.ReadFile(filepath.Join(staticPath, "homepage.html"))
-	if err != nil {
-		log.Panic(err)
-	}
-	homepage = dir
+	// homepage, err := os.ReadFile(filepath.Join(staticPath, "homepage.html"))
+	// if err != nil {
+	// 	log.Panic(err)
+	// }
 
 	// Setup event log for server
 	eventlog.EventLog = eventlog.New()
@@ -78,54 +85,126 @@ func main() {
 
 	log.Printf("Starting server on https://localhost:%d\n", PORT)
 
-	// Run server in new goroutine
-	go func() {
-		if err := s.ListenAndServe(); err != nil {
-			log.Panic(err)
-		}
-	}()
-
-	// Start first game and run until server closes
 	currentGame = game.New()
-	for {
-		// If health of either combatant reaches 0, start a new game
-		currentGame.StepGame()
 
-		time.Sleep(time.Second * 1)
-		log.Printf("GameState is %v\n", currentGame)
+	sseHub = NewHub()
+	go sseHub.Run()
+	// Start first game and run until server closes
+	go runGame(currentGame, sseHub)
+
+	if err := s.ListenAndServe(); err != nil {
+		log.Panic(err)
+	}
+}
+
+func runGame(gs game.GameState, hub *Hub) {
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	var buffer bytes.Buffer
+	buffer.Grow(300)
+	w := bufio.NewWriter(&buffer)
+
+	for range ticker.C {
+		// If health of either combatant reaches 0, start a new game
+		buffer.Reset()
+
+		gs.StepGame()
+		// log.Printf("GameState is %v\n", gs)
+		// if gs.Winner ==  {
+		// 	// Create new game as gs
+		// }
+
+		if len(sseHub.clients) > 0 {
+			// Render new gamestate into html for all clients
+			sides := components.FighterSides(gs, siteAssets)
+			err := sides.Render(context.TODO(), w)
+			if err != nil {
+				log.Panic(err)
+			}
+
+			events := components.EventLog(eventlog.EventLog)
+			err = events.Render(context.TODO(), w)
+			if err != nil {
+				log.Panic(err)
+			}
+			w.Flush()
+			hub.broadcast <- buffer.Bytes()
+			// log.Printf("RENDERED")
+		}
+
 	}
 }
 
 func getGame(w http.ResponseWriter, r *http.Request) {
-	// rc := http.NewResponseController(w)
-	// sse := datastar.NewSSE(w,r)
-	// for {
-	sides := components.FighterSides(currentGame, siteAssets)
-	err := sides.Render(r.Context(), w)
-	if err != nil {
-		log.Panic(err)
+	rc := http.NewResponseController(w)
+	rc.SetWriteDeadline(time.Time{})
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	encodings := r.Header.Get("Accept-Encoding")
+
+	var brotliWriter *brotli.Writer = nil
+	var gzipWriter *gzip.Writer = nil
+	switch {
+	case strings.Contains(encodings, "br"):
+		w.Header().Set("Content-Encoding", "br")
+		brotliWriter = brotli.NewWriterOptions(w, brotli.WriterOptions{Quality: 5, LGWin: 24})
+		break
+	case strings.Contains(encodings, "gzip"):
+		w.Header().Set("Content-Encoding", "gzip")
+		var err error
+		gzipWriter, err = gzip.NewWriterLevel(w, 5)
+		if err != nil {
+			gzipWriter = nil
+			break
+		}
 	}
-	// err := sse.PatchElementTempl(sides)
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
-	// events := components.EventLog(eventlog.EventLog)
-	// err = sse.PatchElementTempl(events)
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
-	// commands := currentGame.AudioPlayers.FormatAudioPlayer() // Get current audio command based on game state
-	// err = sse.ExecuteScript(commands)
-	// if err != nil {
-	// 	http.Error(w, "Unable to play audio via execute script", 500)
-	// 	continue
-	// }
-	// err = rc.SetWriteDeadline(time.Now().Add(time.Second * 5))
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
-	// time.Sleep(time.Second)
-	// }
+
+	client := make(chan []byte, 8)
+
+	sseHub.register <- client
+	defer func() { sseHub.unregister <- client }()
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming not supported", http.StatusInternalServerError)
+		return
+	}
+
+	for {
+		select {
+		case html, ok := <-client:
+			if !ok {
+				return
+			}
+			var writeErr error
+			if brotliWriter != nil {
+				log.Printf("Compressing with brotli\n")
+				writeErr = WriteSSE(brotliWriter, html)
+				err := brotliWriter.Flush()
+				if err != nil {
+					fmt.Printf("error flushing writer %v", err)
+				}
+			} else if gzipWriter != nil {
+				log.Printf("Compressing with gzip\n")
+				writeErr = WriteSSE(gzipWriter, html)
+				err := gzipWriter.Flush()
+				if err != nil {
+					fmt.Printf("error flushing writer %v", err)
+				}
+			} else {
+				writeErr = WriteSSE(w, html)
+			}
+			if writeErr != nil {
+				return
+			}
+			flusher.Flush()
+		case <-r.Context().Done():
+			return
+		}
+	}
 }
 
 func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
@@ -191,7 +270,7 @@ func handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
 	w.Write(fmt.Appendf([]byte{}, "<div>Got name: %s</div> <div> Has %d gold... </div>", name, gold))
 }
 
-type BetShape struct {
+type betShape struct {
 	BetAmount int    `json:"betamount"`
 	BetSide   string `json:"betside"`
 }
@@ -203,7 +282,7 @@ func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Body received: %s", r.Body)
 	decoder := json.NewDecoder(r.Body)
-	var betInfo BetShape
+	var betInfo betShape
 	err := decoder.Decode(&betInfo)
 	if err != nil {
 		log.Panicf("Unable to decode json request: %v", err)

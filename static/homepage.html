@@ -3,43 +3,46 @@
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-	<!--<link href="./styles/output.css" type="text/css" rel="stylesheet">-->
-	<!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
-
-	<link href="./styles/homepage.css" type="text/css" rel="stylesheet">
-	<link href="./styles/animations.css" type="text/css" rel="stylesheet">
-	<title> Js-bet Game </title>
-	<script type="module" src="./js/htmx.min.js"></script>
+	<link href="/styles/homepage.css" type="text/css" rel="stylesheet">
+	<link href="/styles/animations.css" type="text/css" rel="stylesheet">
+	<link href="/styles/eventlog.css" type="text/css" rel="stylesheet">
+	<title> Js-bet </title>
+	<!-- <script src="/js/htmx.min.js"></script> -->
+	<!-- <script src="/js/hx-sse.min.js"></script> -->
+	<script src="https://cdn.jsdelivr.net/npm/htmx.org@next/dist/htmx.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/htmx.org@next/dist/ext/hx-sse.js"></script>
 </head>
 
 <body>
-	<nav id="nav-header">
-		<button type="button" data-hx-get="/user/about"> About</button>
-		<button type="button" data-hx-get="/user/stats"> Stats</button>
-		<h1>Welcome to Js.Bet!</h1>
-		<button type="button" data-hx-get="/user/login"> Login</button>
-		<button type="button" data-hx-get="/user/source"> Source</button>
+	<nav id="nav-header" data-hx-boost:inherited="true">
+		<a href="/user/about"> About</a>
+		<a href="/user/stats"> Stats</a>
+		<h1>Welcome to <br>Js.Bet!</h1>
+		<a href="/user/login"> Login</a>
+		<a href="/user/source"> Source</a>
 	</nav>
-	<div id="game" data-hx-get="/game" data-hx-trigger="load every 1s">
+	<div id="game" data-hx-sse:connect="/game">
 		<div id="fighter-sides"></div>
 		<div id="eventlog"></div>
 	</div>
-	<div id="left-bet">
-		<div> Bet on Left! </div>
+
+	<div id="left-bet" class="bet">
+		Bet on Left!
 		<form data-hx-post="/placeBet">
 			<input hidden name="betside" value="left">
 			<input required name="betamount" placeholder="10" type="number">
-			<button> Place Bet </button>
+			<button>Place Bet</button>
 		</form>
 	</div>
-	<div id="right-bet">
-		<div> Bet on Right! </div>
+	<div id="right-bet" class="bet">
+		Bet on Right!
 		<form data-hx-post="/placeBet">
 			<input hidden name="betside" value="right">
 			<input required name="betamount" placeholder="10" type="number">
 			<button>Place Bet</button>
 		</form>
 	</div>
+
 	<div id="popup" hidden></div>
 	<div id="audio-players">
 		<audio id="attack-player">
@@ -61,68 +64,3 @@
 </body>
 
 </html>
-<!-- <body class="bg-gray-800 text-white text-center m-0 p-0"> -->
-<!-- <div id="title-header" class="fixed flex items-center justify-center w-screen py-4 bg-gray-500"> -->
-<!-- <h1 class="text-4xl ">Welcome to Js.Bet!</h1> -->
-<!-- </div> -->
-<!-- <nav id="nav-header" class="fixed flex items-center justify-end w-screen py-4 gap-10 px-10"> -->
-<!-- <button -->
-<!-- class="text-xl mx-2 w-1/12 h-10 bg-blue-400 rounded-md border-4 border-gray-700 hover:bg-blue-300 transtion-colors hover:transition-colors hover:ease-in-out cursor-pointer" -->
-<!-- type="button" data-on-click="@get('/user/signup')"> Signup</button> -->
-<!-- <button -->
-<!-- class="text-xl mx-2 w-1/12 h-10 bg-blue-400 rounded-md border-4 border-gray-700 hover:bg-blue-300 transtion-colors hover:transition-colors hover:ease-in-out cursor-pointer" -->
-<!-- type="button" data-on-click="@get('/user/login')"> Login</button> -->
-<!-- </nav> -->
-<!-- <div id="game" class="w-full h-full" data-on-load="@get('/game/')"> -->
-<!-- <div id="fighter-sides"></div> -->
-<!-- <div id="eventlog"></div> -->
-<!-- </div> -->
-<!-- <div id="left-bet" -->
-<!-- class="m-auto flex flex-col gap-2 items-center justify-center fixed top-8/12 left-1/12 w-2/12 h-3/12 bg-blue-400 border-6 border-color-black rounded-lg"> -->
-<!-- <div class="text-2xl"> Bet on Left! </div> -->
-<!-- <form class="flex flex-col gap-1 items-center justify-center" -->
-<!-- data-hx-post="/placeBet"> -->
-<!-- <input hidden name="betside" value="left"> -->
-<!-- <input required name="betamount" class="text-2xl text-center border-4 border-color-white w-10/12" placeholder="10" -->
-<!-- type="number"> -->
-<!-- <button -->
-<!-- class="text-2xl cursor-pointer hover:bg-blue-300 hover:border-blue-600 hover:transition-colors hover:ease-in-out transition-colors bg-blue-500 border-4 border-white rounded"> -->
-<!-- Place Bet -->
-<!-- </button> -->
-<!-- </form> -->
-<!-- </div> -->
-<!-- <div id="right-bet" -->
-<!-- class="m-auto flex flex-col gap-2 items-center justify-center fixed top-8/12 left-9/12 w-2/12 h-3/12 bg-blue-400 border-6 border-color-black rounded-lg"> -->
-<!-- <div class="text-2xl"> Bet on Right! </div> -->
-<!-- <form class="flex flex-col gap-1 items-center justify-center" -->
-<!-- data-hx-post="/placeBet"> -->
-<!-- <input hidden name="betside" value="right"> -->
-<!-- <input required name="betamount" class="text-2xl text-center border-4 border-color-white w-10/12" placeholder="10" -->
-<!-- type="number"> -->
-<!-- <button -->
-<!-- class="text-2xl cursor-pointer hover:bg-blue-300 hover:border-blue-600 hover:transition-colors transition-colors hover:ease-in-out bg-blue-500 border-4 border-white rounded"> -->
-<!-- Place Bet -->
-<!-- </button> -->
-<!-- </form> -->
-<!-- </div> -->
-<!-- <div id="popup" hidden></div> -->
-<!-- <div id="audio-players"> -->
-<!-- <audio id="attack-player"> -->
-<!-- <source src="./audio/attack.wav" type="audio/wav"> -->
-<!-- </audio> -->
-<!-- <audio id="block-player"> -->
-<!-- <source src="./audio/block.wav" type="audio/wav"> -->
-<!-- </audio> -->
-<!-- <audio id="dodge-player"> -->
-<!-- <source src="./audio/dodge.wav" type="audio/wav"> -->
-<!-- </audio> -->
-<!-- <audio id="crit-player"> -->
-<!-- <source src="./audio/crit.wav" type="audio/wav"> -->
-<!-- </audio> -->
-<!-- <audio id="winner-player"> -->
-<!-- <source src="./audio/winner.wav" type="audio/wav"> -->
-<!-- </audio> -->
-<!-- </div> -->
-<!-- </body> -->
-
-<!-- </html> -->

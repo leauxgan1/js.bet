@@ -3,7 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
-	"js-bet/src/eventlog"
+	"js-bet/internal/eventlog"
 	"log"
 	"math/rand/v2"
 )
@@ -174,7 +174,7 @@ var fighterList = [...]Fighter{
 func chooseRandomFighter() Fighter {
 	randomIndex := rand.IntN(len(fighterList))
 	randomFighter := fighterList[randomIndex]
-	log.Printf("Randomly chose %v\n", randomFighter)
+	// log.Printf("Randomly chose %v\n", randomFighter)
 	return randomFighter
 }
 
@@ -196,7 +196,7 @@ func chooseRandomFighterExclusive(excludedFighterName string) (Fighter, error) {
 
 	randomIndex := 1 + rand.IntN(len(fighterList)-1) // Choose from [1,1-len)
 	randomFighter := fighterList[randomIndex]
-	log.Printf("Randomly chose %v, excluding %s\n", randomFighter, excludedFighterName)
+	// log.Printf("Randomly chose %v, excluding %s\n", randomFighter, excludedFighterName)
 	return randomFighter, nil
 }
 
