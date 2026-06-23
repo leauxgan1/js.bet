@@ -12,6 +12,10 @@
   justify-content: center;
   align-items: center;
 
+  >* {
+    margin-bottom: 220px;
+  }
+
   #left-fighter-side {
     display: flex;
     flex-direction: row;
@@ -19,7 +23,7 @@
     left: 10%;
 
     .fighter-inner-stats {
-      background: gray;
+      /* background: gray; */
     }
   }
 
@@ -31,6 +35,10 @@
 }
 
 .fighter-inner-stats {
-  background: gray;
-  margin-inline: 10%;
+  background: red;
+  padding-inline: var(--size-4);
+  border: var(--size-2) solid var(--white);
+  border-radius: var(--radius-2);
+  text-align: center;
+
 }

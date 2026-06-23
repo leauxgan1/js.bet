@@ -3,7 +3,7 @@
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-	<link href="/styles/homepage.css" type="text/css" rel="stylesheet">
+	<link href="/styles/index.css" type="text/css" rel="stylesheet">
 	<link href="/styles/animations.css" type="text/css" rel="stylesheet">
 	<link href="/styles/eventlog.css" type="text/css" rel="stylesheet">
 	<link href="/styles/fightersides.css" type="text/css" rel="stylesheet">
@@ -18,7 +18,7 @@
 	<nav id="nav-header" data-hx-boost:inherited="true">
 		<a href="/user/about"> About</a>
 		<a href="/user/stats"> Stats</a>
-		<h1>Welcome to <br>Js.Bet!</h1>
+		<h1>Welcome to Js.Bet!</h1>
 		<a href="/user/login"> Login</a>
 		<a href="/user/source"> Source</a>
 	</nav>
@@ -28,7 +28,7 @@
 	</div>
 
 	<div id="left-bet" class="bet">
-		Bet on Left!
+		<span>Bet on left!</span>
 		<form data-hx-post="/placeBet">
 			<input hidden name="betside" value="left">
 			<input required name="betamount" placeholder="10" type="number">
@@ -36,7 +36,7 @@
 		</form>
 	</div>
 	<div id="right-bet" class="bet">
-		Bet on Right!
+		<span>Bet on Right!</span>
 		<form data-hx-post="/placeBet">
 			<input hidden name="betside" value="right">
 			<input required name="betamount" placeholder="10" type="number">
