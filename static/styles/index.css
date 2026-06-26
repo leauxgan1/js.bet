@@ -10,23 +10,22 @@
 
   --text-color: #fff;
   --button-color: #55ccff;
+
+  --left-gradient-color: #ff1111;
+  --right-gradient-color: #1111ff;
 }
 
 html,
 body {
   color: var(--text-color);
   font-family: var(--font-mono);
-  font-size: clamp(0.5rem, 1.5vw, 1.5rem);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
 }
-
 
 body {
   display: grid;
   place-content: center;
-  /* padding: var(--size-7); */
-  /* gap: var(--size-7); */
   background: var(--tertiary);
-  color: var(--text-color);
 }
 
 button {
@@ -42,31 +41,26 @@ nav {
   width: 100%;
   height: 10%;
   border-bottom: var(--border-size-3) solid white;
+  overflow: hidden;
 
 
   display: grid;
-  grid-template: 0px / repeat(5, minmax(200px, 1fr));
+  grid-template: 0px / repeat(5, minmax(100px, 1fr));
 
   padding-inline: 100px;
-  justify-content: center;
   align-content: center;
   align-items: center;
 
-  /* :first-child { */
-  /* margin-left: 100px; */
-  /* } */
 
-  /* :last-child { */
-  /* margin-right: 100px; */
-  /* } */
-
+  >* {
+    margin-inline: var(--size-3);
+  }
 
   >a {
     background: var(--button-color);
     border: var(--border-size-3) solid var(--secondary);
     border-radius: var(--size-px-2);
     text-align: center;
-    margin-inline: 1em;
     min-width: 10%;
     color: white;
     text-shadow: 1px 1px #303030;
@@ -92,10 +86,8 @@ nav {
     padding: var(--size-2);
     font-size: var(--size-relative-7);
     overflow: hide;
-    margin-inline: var(--size-6);
     max-inline-size: unset;
     text-align: center;
-
   }
 
 }
@@ -106,8 +98,6 @@ nav {
   top: 70%;
   width: 20%;
 
-
-  max-height: 25%;
   background: var(--gray-6);
   padding: var(--size-3);
   border: var(--border-size-3) solid white;

@@ -9,35 +9,64 @@ import (
 )
 
 templ FighterSides(gameState game.GameState, assets assets.Assets) {
-	<div id="fighter-sides">
-		<div id="left-fighter-side">
+	<div id="fighter-sides" data-audios={gameState.AudioPlayers.FormatAudioPlayer()} style={fmt.Sprintf("--left-gradient-color: %s;--right-gradient-color:%s;", gameState.LeftFighter.Color, gameState.RightFighter.Color)}>
+		<div id="left-fighter-side" >
 			@FighterStats(gameState.LeftFighter)
 			@FighterIcon(gameState.LeftFighter,true,assets)
 		</div>
-		<div id="right-fighter-side">
+		<div id="right-fighter-side" >
 			@FighterIcon(gameState.RightFighter,false,assets)
 			@FighterStats(gameState.RightFighter)
+		</div>
+		<div id="audio-players">
+			if gameState.AudioPlayers.AttackPlaying {
+				<audio autoplay>
+					<source src="/audio/attack.wav" type="audio/wav">
+				</audio>
+			}
+			if gameState.AudioPlayers.BlockPlaying {
+				<audio autoplay>
+					<source src="/audio/block.wav" type="audio/wav">
+				</audio>
+			}
+			if gameState.AudioPlayers.WinnerPlaying {
+				<audio autoplay>
+					<source src="/audio/winner.wav" type="audio/wav">
+				</audio>
+			}
+			if gameState.AudioPlayers.DodgePlaying {
+				<audio autoplay>
+					<source src="/audio/dodge.wav" type="audio/wav">
+				</audio>
+			}
+			if gameState.AudioPlayers.CritPlaying {
+				<audio autoplay>
+					<source src="/audio/crit.wav" type="audio/wav">
+				</audio>
+			}
 		</div>
 	</div>
 }
 
 templ FighterStats(f game.Fighter) {
 	<div class={"fighter-inner-stats"}>
-		<div>
+		<h2>
 			{ f.Name }
-		</div>
+		</h2>
 		<div>
 			Health: 
 			// @ProgressBar(f.Health,f.MaxHealth)
+			{f.Health} / {f.MaxHealth}
 		</div>
 		<div>
 			Damage: { f.Damage } </div>
 		<div>
-			Speed { f.Speed }
+			Speed: { f.Speed }
 		</div>
 		<div>
 			Timer: 
 			// @ProgressBar(f.Timer,game.DEFAULT_TIMER)
+			{f.Timer} / {game.DEFAULT_TIMER}
 		</div>
 		<div>
 			Accuracy: { strings.Split(fmt.Sprintf("%f",f.Accuracy * 100),".")[0] }% 
@@ -86,9 +115,9 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 
 templ EventLog(f eventlog.FighterEventLog) {
 	<ul id="eventlog">
-		for _, item := range f.Log {
-			<li>
-				{item}
+		for i, item := range f.Log {
+			<li id={fmt.Sprintf("event-%d",i)}>
+				{i}: {item}
 			</li>
 		}
 	</ul>

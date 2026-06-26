@@ -1,7 +1,7 @@
 package game
 
 import (
-	"fmt"
+	"strings"
 )
 
 // / Audio struct where true players will play and false will be reset each update
@@ -22,41 +22,27 @@ func (a *AudioPlayer) Stop() {
 }
 
 // TODO make this a for loop
-// / Convert audioplayer state into javascript able to be executed from the server, in which all on players play and all off players stop and reset
+//
+//	Convert audioplayer state into a recognizable string the client can use to play audio
 func (a AudioPlayer) FormatAudioPlayer() string {
-	var command string = ""
-	if a.AttackPlaying == true {
-		command += FormatAudioPlayCommand("attack-player")
-	} else {
-		command += FormatAudioStopCommand("attack-player")
+	builder := strings.Builder{}
+	if a.AttackPlaying {
+		builder.Write([]byte("attack,"))
 	}
-	if a.BlockPlaying == true {
-		command += FormatAudioPlayCommand("block-player")
-	} else {
-		command += FormatAudioStopCommand("block-player")
+	if a.BlockPlaying {
+		builder.Write([]byte("block,"))
 	}
-	if a.DodgePlaying == true {
-		command += FormatAudioPlayCommand("dodge-player")
-	} else {
-		command += FormatAudioStopCommand("dodge-player")
+	if a.DodgePlaying {
+		builder.Write([]byte("dodge,"))
 	}
-	if a.CritPlaying == true {
-		command += FormatAudioPlayCommand("crit-player")
-	} else {
-		command += FormatAudioStopCommand("crit-player")
+	if a.CritPlaying {
+		builder.Write([]byte("crit,"))
 	}
-	if a.WinnerPlaying == true {
-		command += FormatAudioPlayCommand("winner-player")
-	} else {
-		command += FormatAudioStopCommand("winner-player")
+	if a.WinnerPlaying {
+		builder.Write([]byte("winner,"))
 	}
-	return command
-}
-
-func FormatAudioPlayCommand(id string) string {
-	return fmt.Sprintf("document.querySelector('#%s').play();", id)
-}
-
-func FormatAudioStopCommand(id string) string {
-	return fmt.Sprintf("var p = document.querySelector('#%s');p.pause();p.currentTime = 0;", id)
+	if builder.Len() == 0 {
+		return "none"
+	}
+	return builder.String()
 }

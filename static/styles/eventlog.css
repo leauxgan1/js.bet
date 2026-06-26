@@ -1,14 +1,17 @@
 #eventlog {
   position: fixed;
-  top: 75%;
+  display: flex;
+  flex-direction: column;
+  top: 70%;
   left: 35%;
-  height: var(--size-12);
+  height: 28%;
   width: 30%;
   overflow-y: scroll;
   background-color: var(--gray-6);
   border: var(--border-size-3) solid white;
   border-radius: var(--radius-2);
   padding: var(--size-2) var(--size-1);
+
 
   li {
     /* font-family: var(--font-system-ui); */

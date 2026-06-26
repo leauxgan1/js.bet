@@ -3,14 +3,10 @@ package internal
 import (
 	"bufio"
 	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
-
-	// "io"
-
-	"compress/gzip"
 	"js-bet/internal/assets"
 	"js-bet/internal/components"
 	"js-bet/internal/eventlog"
@@ -19,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/andybalholm/brotli"
@@ -51,8 +48,7 @@ func StartServer() {
 	// Create new server Handler
 	mux := http.NewServeMux()
 	mux.Handle("/", fileServer)
-	mux.HandleFunc("/game/", getGame)
-	// mux.HandleFunc("/", homepageHandler)
+	mux.HandleFunc("/game/", handleGame)
 	// mux.HandleFunc("/user/signup", handleSignupRequest)
 	// mux.HandleFunc("/user/new", handleNewUserRequest)
 	// mux.HandleFunc("/user/login", handleLoginRequest)
@@ -136,15 +132,20 @@ func runGame(gs game.GameState, hub *Hub) {
 	}
 }
 
-func getGame(w http.ResponseWriter, r *http.Request) {
+/*
+Connects user to SSE connection to get game updates
+Attempts to serve the html with different forms of compression depending on the accepted content encodings of the client
+*/
+func handleGame(w http.ResponseWriter, r *http.Request) {
 	rc := http.NewResponseController(w)
 	rc.SetWriteDeadline(time.Time{})
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	encodings := r.Header.Get("Accept-Encoding")
+	w.Header().Set("Play-Audio", "attack,block")
 
+	encodings := r.Header.Get("Accept-Encoding")
 	var brotliWriter *brotli.Writer = nil
 	var gzipWriter *gzip.Writer = nil
 	switch {

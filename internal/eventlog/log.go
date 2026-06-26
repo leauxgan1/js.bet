@@ -1,6 +1,5 @@
 package eventlog
 
-
 var EventLog FighterEventLog
 
 type FighterEventLog struct {
@@ -8,7 +7,7 @@ type FighterEventLog struct {
 }
 
 func New() FighterEventLog {
-	return FighterEventLog {
+	return FighterEventLog{
 		Log: []string{},
 	}
 }
@@ -22,5 +21,3 @@ func NewFrom(data string) FighterEventLog {
 func (l *FighterEventLog) Write(data string) {
 	l.Log = append(l.Log, data)
 }
-
-

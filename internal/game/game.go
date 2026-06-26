@@ -1,7 +1,6 @@
 package game
 
 import (
-	"errors"
 	"fmt"
 	"js-bet/internal/eventlog"
 	"log"
@@ -49,21 +48,22 @@ func New() GameState {
 }
 
 func (g *GameState) ResetKeepWinner() {
-	if g.Winner == LEFT {
+	switch g.Winner {
+	case LEFT:
 		g.LeftFighter.Reset()
 		newRight, err := chooseRandomFighterExclusive(g.LeftFighter.Name)
 		if err != nil {
 			return
 		}
 		g.RightFighter = newRight
-	} else if g.Winner == RIGHT {
+	case RIGHT:
 		g.RightFighter.Reset()
 		newLeft, err := chooseRandomFighterExclusive(g.RightFighter.Name)
 		if err != nil {
 			return
 		}
 		g.LeftFighter = newLeft
-	} else {
+	default:
 		*g = New()
 	}
 }
@@ -90,7 +90,7 @@ const (
 
 type Fighter struct {
 	Name      string // Name of framework/library
-	Health    int    // Represents how much of a "industry standard" the framework/library is / likelihood to stick around or be popular
+	Health    int    // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
 	MaxHealth int
 	Damage    int     // Represents how consistently useful the framework/library is for common tasks
 	Speed     int     // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
@@ -98,6 +98,7 @@ type Fighter struct {
 	Accuracy  float32 // Represents how simple the library/frame work is / how easy it is to get it right at first, causes less misses
 	CritRate  float32 // Represents how suprisingly useful or versatile the framework/library is in niche situations
 	State     FighterState
+	Color     string
 }
 
 const DEFAULT_TIMER = 25
@@ -118,6 +119,7 @@ var fighterList = [...]Fighter{
 		Timer:     DEFAULT_TIMER,
 		Accuracy:  0.5,
 		CritRate:  0.0,
+		Color:     "darkblue",
 	},
 	{
 		Name:      "React",
@@ -128,6 +130,7 @@ var fighterList = [...]Fighter{
 		Timer:     DEFAULT_TIMER,
 		Accuracy:  0.6,
 		CritRate:  0.2,
+		Color:     "lightblue",
 	},
 	{
 		Name:      "Svelte",
@@ -138,6 +141,7 @@ var fighterList = [...]Fighter{
 		Timer:     DEFAULT_TIMER,
 		Accuracy:  0.8,
 		CritRate:  0.4,
+		Color:     "darkorange",
 	},
 	{
 		Name:      "Solid",
@@ -148,6 +152,7 @@ var fighterList = [...]Fighter{
 		Timer:     DEFAULT_TIMER,
 		Accuracy:  0.8,
 		CritRate:  0.3,
+		Color:     "lightblue",
 	},
 	{
 		Name:      "HTMX",
@@ -158,6 +163,7 @@ var fighterList = [...]Fighter{
 		Timer:     DEFAULT_TIMER,
 		Accuracy:  0.99,
 		CritRate:  0.4,
+		Color:     "blue",
 	},
 	{
 		Name:      "Datastar",
@@ -168,6 +174,7 @@ var fighterList = [...]Fighter{
 		Timer:     DEFAULT_TIMER,
 		Accuracy:  0.99,
 		CritRate:  0.4,
+		Color:     "red",
 	},
 }
 
@@ -187,7 +194,7 @@ func chooseRandomFighterExclusive(excludedFighterName string) (Fighter, error) {
 		}
 	}
 	if swapIndex == -1 {
-		return Fighter{}, errors.New(fmt.Sprintf("Error: Fighter name %s not found", excludedFighterName))
+		return Fighter{}, fmt.Errorf("error: Fighter name %s not found", excludedFighterName)
 	}
 	// Swap excluded fighter with first index
 	temp := fighterList[0]
