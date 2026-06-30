@@ -25,23 +25,23 @@ templ FighterStats(f game.Fighter) {
 		<div>
 			Health: 
 			// @ProgressBar(f.Health,f.MaxHealth)
-			{f.Health} / {f.MaxHealth}
+			{f.Health.Value} / {f.Health.MaxValue}
 		</div>
 		<div>
-			Damage: { f.Damage } </div>
+			Damage: { f.Damage.Value } </div>
 		<div>
-			Speed: { f.Speed }
+			Speed: { f.Speed.Value }
 		</div>
 		<div>
 			Timer: 
 			// @ProgressBar(f.Timer,game.DEFAULT_TIMER)
-			{f.Timer} / {game.DEFAULT_TIMER}
+			{f.Timer.Value} / {f.Timer.MaxValue}
 		</div>
 		<div>
-			Accuracy: { strings.Split(fmt.Sprintf("%f",f.Accuracy * 100),".")[0] }% 
+			Accuracy: { strings.Split(fmt.Sprintf("%f",f.Accuracy.Value * 100),".")[0] }% 
 		</div> 
 		<div>
-			Crit: { strings.Split(fmt.Sprintf("%f",f.CritRate * 100),".")[0] }% 
+			Crit: { strings.Split(fmt.Sprintf("%f",f.CritRate.Value * 100),".")[0] }% 
 		</div>
 	</div>
 }
@@ -50,7 +50,7 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 	{{
 		var animationName string
 		var iconID string
-		wounded := fighter.Health <= fighter.MaxHealth / 2
+		wounded := fighter.Health.Value <= fighter.Health.MaxValue / 2
 		var defaultAnim string = "bounce"
 		if wounded {
 			defaultAnim = "wounded"

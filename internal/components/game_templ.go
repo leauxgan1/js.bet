@@ -148,9 +148,9 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(f.Health)
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(f.Health.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 28, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 28, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -161,9 +161,9 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(f.MaxHealth)
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(f.Health.MaxValue)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 28, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 28, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -174,9 +174,9 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(f.Damage)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(f.Damage.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 31, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 31, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -187,9 +187,9 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(f.Speed)
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(f.Speed.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 33, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 33, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -200,9 +200,9 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(f.Timer)
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(f.Timer.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 38, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 38, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -213,9 +213,9 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(game.DEFAULT_TIMER)
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(f.Timer.MaxValue)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 38, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 38, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -226,9 +226,9 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Split(fmt.Sprintf("%f", f.Accuracy*100), ".")[0])
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Split(fmt.Sprintf("%f", f.Accuracy.Value*100), ".")[0])
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 41, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 41, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -239,9 +239,9 @@ func FighterStats(f game.Fighter) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Split(fmt.Sprintf("%f", f.CritRate*100), ".")[0])
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Split(fmt.Sprintf("%f", f.CritRate.Value*100), ".")[0])
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 44, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 44, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -279,7 +279,7 @@ func FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) templ.Co
 
 		var animationName string
 		var iconID string
-		wounded := fighter.Health <= fighter.MaxHealth/2
+		wounded := fighter.Health.Value <= fighter.Health.MaxValue/2
 		var defaultAnim string = "bounce"
 		if wounded {
 			defaultAnim = "wounded"

@@ -7,15 +7,15 @@ import (
 	"math/rand/v2"
 )
 
-var bets map[string]int = make(map[string]int)
+var Bets map[string]int = make(map[string]int)
 
-func setBet(name string, amount int) {
-	bets[name] = amount
+func SetBet(name string, amount int) {
+	Bets[name] = amount
 }
 
-func clearBets() {
-	for k := range bets {
-		delete(bets, k)
+func ClearBets() {
+	for k := range Bets {
+		delete(Bets, k)
 	}
 }
 
@@ -88,93 +88,108 @@ const (
 	DYING
 )
 
-type Fighter struct {
-	Name      string // Name of framework/library
-	Health    int    // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
-	MaxHealth int
-	Damage    int     // Represents how consistently useful the framework/library is for common tasks
-	Speed     int     // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
-	Timer     int     // Time before next action of fighter, reduced by speed each turn
-	Accuracy  float32 // Represents how simple the library/frame work is / how easy it is to get it right at first, causes less misses
-	CritRate  float32 // Represents how suprisingly useful or versatile the framework/library is in niche situations
-	State     FighterState
-	Color     string
+type IntStat struct {
+	Value    int
+	MaxValue int
 }
 
-const DEFAULT_TIMER = 25
+func NewIntStat(value int) IntStat {
+	return IntStat{
+		Value:    value,
+		MaxValue: value,
+	}
+}
+
+type FloatStat struct {
+	Value    float32
+	MaxValue float32
+}
+
+func NewFloatStat(value float32) FloatStat {
+	return FloatStat{
+		Value:    value,
+		MaxValue: value,
+	}
+}
+
+type Fighter struct {
+	Name     string    // Name of framework/library
+	Color    string    // Color of logo
+	Health   IntStat   // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
+	Damage   IntStat   // Represents how consistently useful the framework/library is for common tasks
+	Speed    IntStat   // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
+	Timer    IntStat   // Time before next action of fighter, reduced by speed each turn
+	Accuracy FloatStat // Represents how simple the library/frame work is / how easy it is to get it right at first, causes less misses
+	CritRate FloatStat // Represents how suprisingly useful or versatile the framework/library is in niche situations
+	State    FighterState
+}
 
 func (f *Fighter) Reset() *Fighter {
 	f.State = READY
-	f.Health = f.MaxHealth
+	f.Health.Value = f.Health.MaxValue
 	return f
 }
 
 var fighterList = [...]Fighter{
 	{
-		Name:      "JQuery",
-		Health:    30,
-		MaxHealth: 30,
-		Damage:    4,
-		Speed:     8,
-		Timer:     DEFAULT_TIMER,
-		Accuracy:  0.5,
-		CritRate:  0.0,
-		Color:     "darkblue",
+		Name:     "JQuery",
+		Color:    "#0769AD",
+		Health:   NewIntStat(30),
+		Damage:   NewIntStat(4),
+		Speed:    NewIntStat(8),
+		Timer:    NewIntStat(20),
+		Accuracy: NewFloatStat(0.5),
+		CritRate: NewFloatStat(0.0),
 	},
 	{
-		Name:      "React",
-		Health:    20,
-		MaxHealth: 20,
-		Damage:    5,
-		Speed:     3,
-		Timer:     DEFAULT_TIMER,
-		Accuracy:  0.6,
-		CritRate:  0.2,
-		Color:     "lightblue",
+		Name:     "React",
+		Color:    "#58C4DC",
+		Health:   NewIntStat(20),
+		Damage:   NewIntStat(5),
+		Speed:    NewIntStat(3),
+		Timer:    NewIntStat(20),
+		Accuracy: NewFloatStat(0.6),
+		CritRate: NewFloatStat(0.2),
 	},
 	{
-		Name:      "Svelte",
-		Health:    16,
-		MaxHealth: 16,
-		Damage:    5,
-		Speed:     7,
-		Timer:     DEFAULT_TIMER,
-		Accuracy:  0.8,
-		CritRate:  0.4,
-		Color:     "darkorange",
+		Name:     "Svelte",
+		Color:    "#FF5018",
+		Health:   NewIntStat(16),
+		Damage:   NewIntStat(5),
+		Speed:    NewIntStat(7),
+		Timer:    NewIntStat(20),
+		Accuracy: NewFloatStat(0.8),
+		CritRate: NewFloatStat(0.4),
 	},
 	{
-		Name:      "Solid",
-		Health:    16,
-		MaxHealth: 16,
-		Damage:    6,
-		Speed:     7,
-		Timer:     DEFAULT_TIMER,
-		Accuracy:  0.8,
-		CritRate:  0.3,
-		Color:     "lightblue",
+		Name:     "Solid",
+		Color:    "#3E5E88",
+		Health:   NewIntStat(16),
+		Damage:   NewIntStat(6),
+		Speed:    NewIntStat(7),
+		Timer:    NewIntStat(20),
+		Accuracy: NewFloatStat(0.8),
+		CritRate: NewFloatStat(0.3),
 	},
 	{
-		Name:      "HTMX",
-		Health:    10,
-		MaxHealth: 10,
-		Damage:    10,
-		Speed:     8,
-		Timer:     DEFAULT_TIMER,
-		Accuracy:  0.99,
-		CritRate:  0.4,
-		Color:     "blue",
+		Name:     "HTMX",
+		Color:    "#3D72D7",
+		Health:   NewIntStat(10),
+		Damage:   NewIntStat(10),
+		Speed:    NewIntStat(8),
+		Timer:    NewIntStat(20),
+		Accuracy: NewFloatStat(0.99),
+		CritRate: NewFloatStat(0.4),
 	},
 	{
-		Name:      "Datastar",
-		Health:    8,
-		MaxHealth: 8,
-		Damage:    11,
-		Speed:     9,
-		Timer:     DEFAULT_TIMER,
-		Accuracy:  0.99,
-		CritRate:  0.4,
-		Color:     "red",
+		Name:     "Datastar",
+		Color:    "#BC4536",
+		Health:   NewIntStat(8),
+		Damage:   NewIntStat(11),
+		Speed:    NewIntStat(9),
+		Timer:    NewIntStat(20),
+		Accuracy: NewFloatStat(0.99),
+		CritRate: NewFloatStat(0.4),
 	},
 }
 
@@ -207,79 +222,63 @@ func chooseRandomFighterExclusive(excludedFighterName string) (Fighter, error) {
 	return randomFighter, nil
 }
 
-type InitiativeEnum bool
+type InitiativeEnum uint
 
 const (
-	LEFT_TO_RIGHT = true
-	RIGHT_TO_LEFT = false
+	LEFT_TO_RIGHT = 0
+	RIGHT_TO_LEFT = 1
 )
 
 func (g *GameState) Act(initiative InitiativeEnum) {
-	var crit bool = false
+	// Determine acting direction based on initiative enum
+	var fighter *Fighter
+	var oppFighter *Fighter
 	if initiative == LEFT_TO_RIGHT {
-		g.LeftFighter.Timer = DEFAULT_TIMER
-
-		hit := g.LeftFighter.CheckHit()
-		damage := g.LeftFighter.Damage
-		g.LeftFighter.State = ATTACKING
-		if !hit {
-			g.AudioPlayers.DodgePlaying = true
-			eventlog.EventLog.Write(fmt.Sprintf("%s just missed...", g.LeftFighter.Name))
-			return
-		} else {
-			g.AudioPlayers.AttackPlaying = true
-		}
-		g.RightFighter.State = DEFENDING
-		g.AudioPlayers.BlockPlaying = true
-		crit = g.LeftFighter.CheckCrit()
-		if crit {
-			g.AudioPlayers.AttackPlaying = false
-			g.AudioPlayers.CritPlaying = true
-			damage *= 2.0
-			g.LeftFighter.State = CRITTING
-			eventlog.EventLog.Write(fmt.Sprintf("%s just crit %s for %d", g.LeftFighter.Name, g.RightFighter.Name, damage))
-		} else {
-			eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", g.LeftFighter.Name, g.RightFighter.Name, damage))
-		}
-		g.RightFighter.Health -= damage
+		fighter = &g.LeftFighter
+		oppFighter = &g.RightFighter
 	} else { // RIGHT_TO_LEFT
-		g.RightFighter.Timer = DEFAULT_TIMER
-
-		hit := g.RightFighter.CheckHit()
-		damage := g.LeftFighter.Damage
-		g.RightFighter.State = ATTACKING
-		if !hit {
-			g.AudioPlayers.DodgePlaying = true
-			eventlog.EventLog.Write(fmt.Sprintf("%s just missed...", g.RightFighter.Name))
-			return
-		} else {
-			g.AudioPlayers.AttackPlaying = true
-		}
-
-		g.LeftFighter.State = DEFENDING
-		g.AudioPlayers.BlockPlaying = true
-		crit = g.LeftFighter.CheckCrit()
-		if crit {
-			g.AudioPlayers.AttackPlaying = false
-			g.AudioPlayers.CritPlaying = true
-			damage *= 2.0
-			g.RightFighter.State = CRITTING
-			eventlog.EventLog.Write(fmt.Sprintf("%s just crit %s for %d", g.RightFighter.Name, g.LeftFighter.Name, damage))
-		} else {
-			eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", g.RightFighter.Name, g.LeftFighter.Name, damage))
-		}
-		g.LeftFighter.Health -= damage
+		fighter = &g.RightFighter
+		oppFighter = &g.LeftFighter
 	}
+
+	// Action logic
+
+	fighter.Timer.Value = fighter.Timer.MaxValue // Reset timer
+
+	hit := fighter.CheckHit()
+	damage := fighter.Damage.Value
+	fighter.State = ATTACKING
+	if !hit {
+		g.AudioPlayers.DodgePlaying = true
+		eventlog.EventLog.Write(fmt.Sprintf("%s just missed...", fighter.Name))
+		return
+	} else {
+		g.AudioPlayers.AttackPlaying = true
+	}
+	oppFighter.State = DEFENDING
+	g.AudioPlayers.BlockPlaying = true
+	crit := fighter.CheckCrit()
+	if crit {
+		g.AudioPlayers.AttackPlaying = false
+		g.AudioPlayers.CritPlaying = true
+		damage *= 2.0
+		fighter.State = CRITTING
+		eventlog.EventLog.Write(fmt.Sprintf("%s just critically hit %s for %d", fighter.Name, oppFighter.Name, damage))
+	} else {
+		eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", fighter.Name, oppFighter.Name, damage))
+	}
+	oppFighter.Health.Value -= damage
 }
+
 func (f Fighter) CheckHit() bool {
-	if f.Accuracy > 0.0 && rand.Float32() < f.Accuracy {
+	if f.Accuracy.Value > 0.0 && rand.Float32() < f.Accuracy.Value {
 		return true
 	}
 	return false
 }
 
 func (f Fighter) CheckCrit() bool {
-	if f.CritRate > 0.0 && rand.Float32() < f.CritRate {
+	if f.CritRate.Value > 0.0 && rand.Float32() < f.CritRate.Value {
 		return true
 	}
 	return false
@@ -287,51 +286,51 @@ func (f Fighter) CheckCrit() bool {
 
 // TODO add sound for winner being determined
 func determineWinner(left Fighter, right Fighter) WinnerEnum {
-	if left.Health <= 0 && right.Health <= 0 {
-		if left.Health < right.Health {
+	if left.Health.Value <= 0 && right.Health.Value <= 0 {
+		if left.Health.Value < right.Health.Value {
 			return RIGHT
 		} else {
 			return LEFT
 		}
-	} else if left.Health <= 0 {
+	} else if left.Health.Value <= 0 {
 		return RIGHT
-	} else if right.Health <= 0 {
+	} else if right.Health.Value <= 0 {
 		return LEFT
 	}
 	return NEITHER
 }
 
 func (g *GameState) StepGame() {
-	// log.Printf("Game Running on frame %d:\n",g.FrameCount)
 	g.FrameCount += 1
 	g.RightFighter.State = READY
 	g.LeftFighter.State = READY
 	g.AudioPlayers.Stop()
+
 	// Check for a non-positive health, choose a winner and keep them in the game for the next round
-	var winner WinnerEnum = determineWinner(g.LeftFighter, g.RightFighter)
+	var winner = determineWinner(g.LeftFighter, g.RightFighter)
 	if winner == LEFT || winner == RIGHT {
 		g.Winner = winner
 		g.ResetKeepWinner()
 		return
 	}
 
-	lReady := g.LeftFighter.Timer <= 0
-	rReady := g.RightFighter.Timer <= 0
+	lReady := g.LeftFighter.Timer.Value <= 0
+	rReady := g.RightFighter.Timer.Value <= 0
 	if lReady && rReady {
-		if g.LeftFighter.Timer == g.RightFighter.Timer { // Choose lesser Timer when both ready, higher speed on ties
-			if g.LeftFighter.Speed == g.RightFighter.Speed {
+		if g.LeftFighter.Timer.Value == g.RightFighter.Timer.Value { // Choose lesser Timer when both ready, higher speed on ties
+			if g.LeftFighter.Speed.Value == g.RightFighter.Speed.Value {
 				rand := rand.Float32() // Choose randomly on second tie
 				if rand < 0.5 {        // Left fighter acts
 					g.Act(LEFT_TO_RIGHT)
 				} else { // Right fighter acts
 					g.Act(RIGHT_TO_LEFT)
 				}
-			} else if g.LeftFighter.Speed > g.RightFighter.Speed {
+			} else if g.LeftFighter.Speed.Value > g.RightFighter.Speed.Value {
 				g.Act(LEFT_TO_RIGHT)
 			} else {
 				g.Act(RIGHT_TO_LEFT)
 			}
-		} else if g.LeftFighter.Timer < g.RightFighter.Timer {
+		} else if g.LeftFighter.Timer.Value < g.RightFighter.Timer.Value {
 			g.Act(LEFT_TO_RIGHT)
 		} else { // g.RightFighter.Timer < g.LeftFighter.Timer
 			g.Act(RIGHT_TO_LEFT)
@@ -341,6 +340,6 @@ func (g *GameState) StepGame() {
 	} else if rReady {
 		g.Act(RIGHT_TO_LEFT)
 	}
-	g.LeftFighter.Timer -= g.LeftFighter.Speed
-	g.RightFighter.Timer -= g.RightFighter.Speed
+	g.LeftFighter.Timer.Value -= g.LeftFighter.Speed.Value
+	g.RightFighter.Timer.Value -= g.RightFighter.Speed.Value
 }
