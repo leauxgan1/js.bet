@@ -1,44 +1,30 @@
 #fighter-sides {
   position: fixed;
   width: 100%;
-  height: 100%;
-
+  height: 90%;
 
   top: 10%;
-  background: linear-gradient(to right, var(--left-gradient-color), var(--right-gradient-color));
   left: 0;
+
+  background: linear-gradient(to right, var(--left-gradient-color), var(--right-gradient-color));
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
 
   >* {
-    margin-bottom: 220px;
+    margin-bottom: 200px;
   }
 
-  #left-fighter-side {
-    display: flex;
-    flex-direction: row;
-
-    left: 10%;
-
-    .fighter-inner-stats {
-      /* background: gray; */
-    }
+  .fighter-inner-stats {
+    background: #515151;
+    padding: var(--size-3);
+    border: var(--size-1) solid white;
+    border-radius: var(--radius-2);
+    text-align: center;
   }
 
-  #right-fighter-side {
-    display: flex;
-    flex-direction: row;
-    left: 60%;
-  }
-}
+  #left-fighter-icon {}
 
-.fighter-inner-stats {
-  background: gray;
-  padding: var(--size-4);
-  border: var(--size-1) solid white;
-  border-radius: var(--radius-2);
-  text-align: center;
-
+  #right-fighter-icon {}
 }

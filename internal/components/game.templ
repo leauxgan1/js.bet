@@ -10,14 +10,10 @@ import (
 
 templ FighterSides(gameState game.GameState, assets assets.Assets) {
 	<div id="fighter-sides" data-audios={gameState.AudioPlayers.FormatAudioPlayer()} style={fmt.Sprintf("--left-gradient-color: %s;--right-gradient-color:%s;", gameState.LeftFighter.Color, gameState.RightFighter.Color)}>
-		<div id="left-fighter-side" >
 			@FighterStats(gameState.LeftFighter)
 			@FighterIcon(gameState.LeftFighter,true,assets)
-		</div>
-		<div id="right-fighter-side" >
 			@FighterIcon(gameState.RightFighter,false,assets)
 			@FighterStats(gameState.RightFighter)
-		</div>
 	</div>
 }
 
