@@ -41,17 +41,23 @@ func NewFloatStat(value float32) FloatStat {
 	}
 }
 
+type Ability struct {
+	InvokeFunc *func(left *Fighter, right *Fighter)
+	Timer      IntStat
+}
+
 type Fighter struct {
-	Name     string       // Name of framework/library
-	Color    string       // Color of logo
-	Health   IntStat      // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
-	Damage   IntStat      // Represents how consistently useful the framework/library is for common tasks
-	Speed    IntStat      // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
-	Accuracy FloatStat    // Represents how simple the library/frame work is / how easy it is to get it right at first (opposite of footguns), causes less misses
-	CritRate FloatStat    // Represents how suprisingly useful or versatile the framework/library is in niche situations
-	Timer    IntStat      // Time before next action of fighter, reduced by speed each turn
-	State    FighterState // Current state of fighter, used for animations
-	// Effects  []Effect // List of currently applied effects
+	Name      string       // Name of framework/library
+	Color     string       // Color of logo
+	Health    IntStat      // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
+	Damage    IntStat      // Represents how consistently useful the framework/library is for common tasks
+	Speed     IntStat      // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
+	Accuracy  FloatStat    // Represents how simple the library/frame work is / how easy it is to get it right at first (opposite of footguns), causes less misses
+	CritRate  FloatStat    // Represents how suprisingly useful or versatile the framework/library is in niche situations
+	Timer     IntStat      // Time before next action of fighter, reduced by speed each turn
+	State     FighterState // Current state of fighter, used for animations
+	Abilities [4]Ability   // Abilities which may apply status effects to fighters
+	Effects   []Effect     // Effects which are applied by abilities and tick down over time
 }
 
 func (f *Fighter) Reset() *Fighter {
@@ -200,3 +206,44 @@ Datastar -> Greedy: Lose some health / Gain Damage buff
 JQuery -> Old, not forgotten: Deal damage equal to max health
 
 */
+
+// React Abilities
+func VirtualDomAbility(left *Fighter, right *Fighter) {
+
+}
+
+// Vue Abilities
+func SecondMostLovedAbility(left *Fighter, right *Fighter) {
+
+}
+
+// Solid Abilities
+func SignalsSignalsEverywhereAbility(left *Fighter, right *Fighter) {
+
+}
+
+// Svelte Abilities
+func Compile(left *Fighter, right *Fighter) {
+
+}
+func MostLoved(left *Fighter, right *Fighter) {
+
+}
+
+// HTMX Abilities
+func OutOfTouch(left *Fighter, right *Fighter) {
+
+}
+func Resilience(left *Fighter, right *Fighter) {
+
+}
+
+// Datastar Abilities
+func GreedyDev(left *Fighter, right *Fighter) {
+
+}
+
+// JQuery Abilities
+func OldButNotForgotten(left *Fighter, right *Fighter) {
+
+}
