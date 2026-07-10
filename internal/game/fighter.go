@@ -42,7 +42,8 @@ func NewFloatStat(value float32) FloatStat {
 }
 
 type Ability struct {
-	InvokeFunc *func(left *Fighter, right *Fighter)
+	Name       string
+	InvokeFunc func(self *Fighter, other *Fighter)
 	Timer      IntStat
 }
 
@@ -66,6 +67,18 @@ func (f *Fighter) Reset() *Fighter {
 	return f
 }
 
+/* Ability ideas:
+
+React -> Virtual DOM: Increase Speed but reduce damage output slightly, I am inevitable...:
+Vue -> Second-most-loved: Heal a small amount, Vapor mode: Increases Speed and Damage slightly
+Solid -> Signals, signals everywhere...: Gain accuracy and speed
+Svelte -> Compile: Increase speed, Most-loved: Heal a moderate amount
+HTMX -> Out of touch: Increase dodge / Reduce Accuracy, Resilience: Deal damage based on defense
+Datastar -> Greedy: Lose some health / Gain Damage buff
+JQuery -> Old, not forgotten: Deal damage equal to max health
+
+*/
+
 var fighterList = [...]Fighter{
 	{
 		Name:     "JQuery",
@@ -76,6 +89,16 @@ var fighterList = [...]Fighter{
 		Timer:    NewIntStat(20),
 		Accuracy: NewFloatStat(0.5),
 		CritRate: NewFloatStat(0.0),
+		Abilities: [4]Ability{
+			{
+				Name: "Old But Not Forgotten",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					other.Health.Value -= self.Health.MaxValue
+				},
+				Timer: NewIntStat(25),
+			},
+		},
+		Effects: make([]Effect, 0),
 	},
 	{
 		Name:     "React",
@@ -86,6 +109,17 @@ var fighterList = [...]Fighter{
 		Timer:    NewIntStat(20),
 		Accuracy: NewFloatStat(0.6),
 		CritRate: NewFloatStat(0.2),
+		Abilities: [4]Ability{
+			{
+				Name: "I am inevitable...",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					self.Damage.MaxValue *= 2
+					self.Damage.Value = self.Damage.MaxValue
+				},
+				Timer: NewIntStat(15),
+			},
+		},
+		Effects: make([]Effect, 1),
 	},
 	{
 		Name:     "Vue",
@@ -96,6 +130,16 @@ var fighterList = [...]Fighter{
 		Timer:    NewIntStat(20),
 		Accuracy: NewFloatStat(0.8),
 		CritRate: NewFloatStat(0.3),
+		Abilities: [4]Ability{
+			{
+				Name: "Second most loved, btw!",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
+				},
+				Timer: NewIntStat(10),
+			},
+		},
+		Effects: make([]Effect, 1),
 	},
 	{
 		Name:     "Svelte",
@@ -106,6 +150,16 @@ var fighterList = [...]Fighter{
 		Timer:    NewIntStat(20),
 		Accuracy: NewFloatStat(0.8),
 		CritRate: NewFloatStat(0.4),
+		Abilities: [4]Ability{
+			{
+				Name: "Most Loved Framework, btw",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
+				},
+				Timer: NewIntStat(10),
+			},
+		},
+		Effects: make([]Effect, 1),
 	},
 	{
 		Name:     "Solid",
@@ -116,6 +170,16 @@ var fighterList = [...]Fighter{
 		Timer:    NewIntStat(20),
 		Accuracy: NewFloatStat(0.8),
 		CritRate: NewFloatStat(0.3),
+		Abilities: [4]Ability{
+			{
+				Name: "Go my signals...",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					other.Health.Value -= self.Health.MaxValue
+				},
+				Timer: NewIntStat(25),
+			},
+		},
+		Effects: make([]Effect, 1),
 	},
 	{
 		Name:     "HTMX",
@@ -126,6 +190,23 @@ var fighterList = [...]Fighter{
 		Timer:    NewIntStat(20),
 		Accuracy: NewFloatStat(0.99),
 		CritRate: NewFloatStat(0.4),
+		Abilities: [4]Ability{
+			{
+				Name: "Web 1.0 Larp",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					other.Health.Value -= self.Health.MaxValue
+				},
+				Timer: NewIntStat(25),
+			},
+			{
+				Name: "Out of touch",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					other.Health.Value -= self.Health.MaxValue
+				},
+				Timer: NewIntStat(25),
+			},
+		},
+		Effects: make([]Effect, 1),
 	},
 	{
 		Name:     "Datastar",
@@ -136,6 +217,16 @@ var fighterList = [...]Fighter{
 		Timer:    NewIntStat(20),
 		Accuracy: NewFloatStat(0.99),
 		CritRate: NewFloatStat(0.4),
+		Abilities: [4]Ability{
+			{
+				Name: "Greedy Dev",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					//
+				},
+				Timer: NewIntStat(10),
+			},
+		},
+		Effects: make([]Effect, 1),
 	},
 }
 
@@ -148,8 +239,8 @@ func chooseRandomFighter() Fighter {
 
 func chooseRandomFighterExclusive(excludedFighterName string) (Fighter, error) {
 	swapIndex := -1
-	for i := 0; i < len(fighterList); i += 1 {
-		if fighterList[i].Name == excludedFighterName {
+	for i, fighter := range fighterList {
+		if fighter.Name == excludedFighterName {
 			swapIndex = i
 			break
 		}
@@ -193,57 +284,4 @@ func (s *Slow) OnTick(f *Fighter) {
 }
 func (s *Slow) OnRemove(f *Fighter) {
 	f.Speed.Value = s.LastSpeed
-}
-
-/* Ability ideas:
-
-React -> Virtual DOM: Increase Speed but reduce damage output slightly, I am inevitable...:
-Vue -> Second-most-loved: Heal a small amount, Vapor mode: Increases Speed and Damage slightly
-Solid -> Signals, signals everywhere...: Gain accuracy and speed
-Svelte -> Compile: Increase speed, Most-loved: Heal a moderate amount
-HTMX -> Out of touch: Increase dodge / Reduce Accuracy, Resilience: Deal damage based on defense
-Datastar -> Greedy: Lose some health / Gain Damage buff
-JQuery -> Old, not forgotten: Deal damage equal to max health
-
-*/
-
-// React Abilities
-func VirtualDomAbility(left *Fighter, right *Fighter) {
-
-}
-
-// Vue Abilities
-func SecondMostLovedAbility(left *Fighter, right *Fighter) {
-
-}
-
-// Solid Abilities
-func SignalsSignalsEverywhereAbility(left *Fighter, right *Fighter) {
-
-}
-
-// Svelte Abilities
-func Compile(left *Fighter, right *Fighter) {
-
-}
-func MostLoved(left *Fighter, right *Fighter) {
-
-}
-
-// HTMX Abilities
-func OutOfTouch(left *Fighter, right *Fighter) {
-
-}
-func Resilience(left *Fighter, right *Fighter) {
-
-}
-
-// Datastar Abilities
-func GreedyDev(left *Fighter, right *Fighter) {
-
-}
-
-// JQuery Abilities
-func OldButNotForgotten(left *Fighter, right *Fighter) {
-
 }
