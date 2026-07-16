@@ -98,7 +98,7 @@ var fighterList = [...]Fighter{
 				Timer: NewIntStat(25),
 			},
 		},
-		Effects: make([]Effect, 0),
+		Effects: make([]Effect, 0, 3),
 	},
 	{
 		Name:        "React",
@@ -127,7 +127,7 @@ var fighterList = [...]Fighter{
 				Timer: NewIntStat(15),
 			},
 		},
-		Effects: make([]Effect, 1),
+		Effects: make([]Effect, 0, 3),
 	},
 	{
 		Name:        "Vue",
@@ -147,7 +147,7 @@ var fighterList = [...]Fighter{
 				Timer: NewIntStat(10),
 			},
 		},
-		Effects: make([]Effect, 1),
+		Effects: make([]Effect, 0, 3),
 	},
 	{
 		Name:        "Svelte",
@@ -167,7 +167,7 @@ var fighterList = [...]Fighter{
 				Timer: NewIntStat(10),
 			},
 		},
-		Effects: make([]Effect, 1),
+		Effects: make([]Effect, 0, 3),
 	},
 	{
 		Name:        "Solid",
@@ -187,7 +187,7 @@ var fighterList = [...]Fighter{
 				Timer: NewIntStat(25),
 			},
 		},
-		Effects: make([]Effect, 1),
+		Effects: make([]Effect, 0, 3),
 	},
 	{
 		Name:        "HTMX",
@@ -214,7 +214,7 @@ var fighterList = [...]Fighter{
 				Timer: NewIntStat(25),
 			},
 		},
-		Effects: make([]Effect, 1),
+		Effects: make([]Effect, 0, 3),
 	},
 	{
 		Name:        "Datastar",
@@ -234,7 +234,7 @@ var fighterList = [...]Fighter{
 				Timer: NewIntStat(10),
 			},
 		},
-		Effects: make([]Effect, 1),
+		Effects: make([]Effect, 0, 3),
 	},
 }
 

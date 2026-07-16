@@ -5,6 +5,7 @@ import (
 	"js-bet/internal/eventlog"
 	"log"
 	"math/rand/v2"
+	"slices"
 )
 
 type Action struct {
@@ -239,25 +240,25 @@ func (g *GameState) StepGame() {
 	}
 
 	// Update all effect durations on each fighter
-	for _, effect := range g.LeftFighter.Effects {
+	for i, effect := range g.LeftFighter.Effects {
 		// Reduce effect duration if > 0
 		if effect.duration.Value > 0 {
 			effect.duration.Value -= 1
+		} else {
+			g.LeftFighter.Effects = slices.Delete(g.LeftFighter.Effects, i, i+1)
 		}
 		// Apply tick function on each fighter
-		if effect.tickFunc != nil {
-			effect.tickFunc(&g.LeftFighter)
-		}
+		effect.tickFunc(&g.LeftFighter)
 	}
-	for _, effect := range g.RightFighter.Effects {
+	for i, effect := range g.RightFighter.Effects {
 		// Reduce effect duration if > 0
 		if effect.duration.Value > 0 {
 			effect.duration.Value -= 1
+		} else {
+			g.RightFighter.Effects = slices.Delete(g.RightFighter.Effects, i, i+1)
 		}
 		// Apply tick function on each fighter
-		if effect.tickFunc != nil {
-			effect.tickFunc(&g.RightFighter)
-		}
+		effect.tickFunc(&g.RightFighter)
 	}
 
 }
