@@ -86,7 +86,7 @@ func (g *GameState) Act(initiative InitiativeEnum) {
 
 	// Action logic
 
-	fighter.Timer.Value = fighter.Timer.MaxValue // Reset timer
+	fighter.AttackTimer.Value = fighter.AttackTimer.MaxValue // Reset timer
 
 	hit := fighter.CheckHit()
 	damage := fighter.Damage.Value
@@ -157,10 +157,53 @@ func (g *GameState) StepGame() {
 		return
 	}
 
-	lReady := g.LeftFighter.Timer.Value <= 0
-	rReady := g.RightFighter.Timer.Value <= 0
+	// Check if an ability is ready on each fighter to see if they should use it
+	// > Prioritize first found abiity in list
+	// > Prioritize fighter with lower cooldown
+	var leftFighterAbility *Ability
+	var rightFighterAbility *Ability
+
+	for _, ability := range g.LeftFighter.Abilities {
+		if ability.Timer.Value <= 0 {
+			leftFighterAbility = &ability
+		}
+	}
+	for _, ability := range g.RightFighter.Abilities {
+		if ability.Timer.Value <= 0 {
+			rightFighterAbility = &ability
+		}
+	}
+	if leftFighterAbility != nil {
+		if rightFighterAbility != nil {
+			if leftFighterAbility.Timer.Value > rightFighterAbility.Timer.Value {
+				rightFighterAbility.InvokeFunc(&g.RightFighter, &g.LeftFighter)
+			} else if leftFighterAbility.Timer.Value < rightFighterAbility.Timer.Value {
+				leftFighterAbility.InvokeFunc(&g.LeftFighter, &g.RightFighter)
+			} else {
+				rand := rand.Float32() // Choose randomly on second tie
+				if rand < 0.5 {        // Left fighter acts
+					leftFighterAbility.InvokeFunc(&g.LeftFighter, &g.RightFighter)
+				} else { // Right fighter acts
+					rightFighterAbility.InvokeFunc(&g.RightFighter, &g.LeftFighter)
+				}
+			}
+			return
+		}
+		leftFighterAbility.InvokeFunc(&g.LeftFighter, &g.RightFighter)
+		return
+	}
+	if rightFighterAbility != nil {
+		rightFighterAbility.InvokeFunc(&g.RightFighter, &g.LeftFighter)
+		return
+	}
+
+	// Todo: Skip doing attack when ability was used
+
+	lReady := g.LeftFighter.AttackTimer.Value <= 0
+	rReady := g.RightFighter.AttackTimer.Value <= 0
+
 	if lReady && rReady {
-		if g.LeftFighter.Timer.Value == g.RightFighter.Timer.Value { // Choose lesser Timer when both ready, higher speed on ties
+		if g.LeftFighter.AttackTimer.Value == g.RightFighter.AttackTimer.Value { // Choose lesser AttackTimer when both ready, higher speed on ties
 			if g.LeftFighter.Speed.Value == g.RightFighter.Speed.Value {
 				rand := rand.Float32() // Choose randomly on second tie
 				if rand < 0.5 {        // Left fighter acts
@@ -173,9 +216,9 @@ func (g *GameState) StepGame() {
 			} else {
 				g.Act(RIGHT_TO_LEFT)
 			}
-		} else if g.LeftFighter.Timer.Value < g.RightFighter.Timer.Value {
+		} else if g.LeftFighter.AttackTimer.Value < g.RightFighter.AttackTimer.Value {
 			g.Act(LEFT_TO_RIGHT)
-		} else { // g.RightFighter.Timer < g.LeftFighter.Timer
+		} else { // g.RightFighter.AttackTimer < g.LeftFighter.AttackTimer
 			g.Act(RIGHT_TO_LEFT)
 		}
 	} else if lReady {
@@ -183,6 +226,38 @@ func (g *GameState) StepGame() {
 	} else if rReady {
 		g.Act(RIGHT_TO_LEFT)
 	}
-	g.LeftFighter.Timer.Value -= g.LeftFighter.Speed.Value
-	g.RightFighter.Timer.Value -= g.RightFighter.Speed.Value
+
+	g.LeftFighter.AttackTimer.Value -= g.LeftFighter.Speed.Value
+	g.RightFighter.AttackTimer.Value -= g.RightFighter.Speed.Value
+
+	// Update all ability timers on each fighter
+	for _, ability := range g.LeftFighter.Abilities {
+		ability.Timer.Value -= 0
+	}
+	for _, ability := range g.RightFighter.Abilities {
+		ability.Timer.Value -= 0
+	}
+
+	// Update all effect durations on each fighter
+	for _, effect := range g.LeftFighter.Effects {
+		// Reduce effect duration if > 0
+		if effect.duration.Value > 0 {
+			effect.duration.Value -= 1
+		}
+		// Apply tick function on each fighter
+		if effect.tickFunc != nil {
+			effect.tickFunc(&g.LeftFighter)
+		}
+	}
+	for _, effect := range g.RightFighter.Effects {
+		// Reduce effect duration if > 0
+		if effect.duration.Value > 0 {
+			effect.duration.Value -= 1
+		}
+		// Apply tick function on each fighter
+		if effect.tickFunc != nil {
+			effect.tickFunc(&g.RightFighter)
+		}
+	}
+
 }

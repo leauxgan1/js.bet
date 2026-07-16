@@ -74,10 +74,10 @@ func StartServer() {
 		ReadTimeout:    time.Second * 5,
 		MaxHeaderBytes: 1 << 20,
 	}
-	db = CreateClient()
-	if err = db.InitDB(); err != nil {
-		log.Panicf("Error initializing database: %v", err)
-	}
+	// db = CreateClient()
+	// if err = db.InitDB(); err != nil {
+	// 	log.Panicf("Error initializing database: %v", err)
+	// }
 
 	log.Printf("Starting server on https://localhost:%d\n", PORT)
 

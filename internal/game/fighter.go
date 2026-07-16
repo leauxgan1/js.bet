@@ -48,17 +48,17 @@ type Ability struct {
 }
 
 type Fighter struct {
-	Name      string       // Name of framework/library
-	Color     string       // Color of logo
-	Health    IntStat      // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
-	Damage    IntStat      // Represents how consistently useful the framework/library is for common tasks
-	Speed     IntStat      // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
-	Accuracy  FloatStat    // Represents how simple the library/frame work is / how easy it is to get it right at first (opposite of footguns), causes less misses
-	CritRate  FloatStat    // Represents how suprisingly useful or versatile the framework/library is in niche situations
-	Timer     IntStat      // Time before next action of fighter, reduced by speed each turn
-	State     FighterState // Current state of fighter, used for animations
-	Abilities [4]Ability   // Abilities which may apply status effects to fighters
-	Effects   []Effect     // Effects which are applied by abilities and tick down over time
+	Name        string       // Name of framework/library
+	Color       string       // Color of logo
+	Health      IntStat      // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
+	Damage      IntStat      // Represents how consistently useful the framework/library is for common tasks
+	Speed       IntStat      // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
+	Accuracy    FloatStat    // Represents how simple the library/frame work is / how easy it is to get it right at first (opposite of footguns), causes less misses
+	CritRate    FloatStat    // Represents how suprisingly useful or versatile the framework/library is in niche situations
+	AttackTimer IntStat      // Time before next action of fighter, reduced by speed each turn
+	State       FighterState // Current state of fighter, used for animations
+	Abilities   []Ability    // Abilities which may apply status effects to fighters
+	Effects     []Effect     // Effects which are applied by abilities and tick down over time
 }
 
 func (f *Fighter) Reset() *Fighter {
@@ -81,15 +81,15 @@ JQuery -> Old, not forgotten: Deal damage equal to max health
 
 var fighterList = [...]Fighter{
 	{
-		Name:     "JQuery",
-		Color:    "#0769AD",
-		Health:   NewIntStat(30),
-		Damage:   NewIntStat(4),
-		Speed:    NewIntStat(8),
-		Timer:    NewIntStat(20),
-		Accuracy: NewFloatStat(0.5),
-		CritRate: NewFloatStat(0.0),
-		Abilities: [4]Ability{
+		Name:        "JQuery",
+		Color:       "#0769AD",
+		Health:      NewIntStat(30),
+		Damage:      NewIntStat(4),
+		Speed:       NewIntStat(8),
+		AttackTimer: NewIntStat(20),
+		Accuracy:    NewFloatStat(0.5),
+		CritRate:    NewFloatStat(0.0),
+		Abilities: []Ability{
 			{
 				Name: "Old But Not Forgotten",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
@@ -101,15 +101,23 @@ var fighterList = [...]Fighter{
 		Effects: make([]Effect, 0),
 	},
 	{
-		Name:     "React",
-		Color:    "#58C4DC",
-		Health:   NewIntStat(20),
-		Damage:   NewIntStat(5),
-		Speed:    NewIntStat(4),
-		Timer:    NewIntStat(20),
-		Accuracy: NewFloatStat(0.6),
-		CritRate: NewFloatStat(0.2),
-		Abilities: [4]Ability{
+		Name:        "React",
+		Color:       "#58C4DC",
+		Health:      NewIntStat(20),
+		Damage:      NewIntStat(5),
+		Speed:       NewIntStat(4),
+		AttackTimer: NewIntStat(20),
+		Accuracy:    NewFloatStat(0.6),
+		CritRate:    NewFloatStat(0.2),
+		Abilities: []Ability{
+			{
+				Name: "Virtual DOM",
+				InvokeFunc: func(self *Fighter, other *Fighter) {
+					self.Damage.Value -= 2
+					self.Speed.Value += 2
+				},
+				Timer: NewIntStat(10),
+			},
 			{
 				Name: "I am inevitable...",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
@@ -122,15 +130,15 @@ var fighterList = [...]Fighter{
 		Effects: make([]Effect, 1),
 	},
 	{
-		Name:     "Vue",
-		Color:    "#00C180",
-		Health:   NewIntStat(15),
-		Damage:   NewIntStat(5),
-		Speed:    NewIntStat(6),
-		Timer:    NewIntStat(20),
-		Accuracy: NewFloatStat(0.8),
-		CritRate: NewFloatStat(0.3),
-		Abilities: [4]Ability{
+		Name:        "Vue",
+		Color:       "#00C180",
+		Health:      NewIntStat(15),
+		Damage:      NewIntStat(5),
+		Speed:       NewIntStat(6),
+		AttackTimer: NewIntStat(20),
+		Accuracy:    NewFloatStat(0.8),
+		CritRate:    NewFloatStat(0.3),
+		Abilities: []Ability{
 			{
 				Name: "Second most loved, btw!",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
@@ -142,15 +150,15 @@ var fighterList = [...]Fighter{
 		Effects: make([]Effect, 1),
 	},
 	{
-		Name:     "Svelte",
-		Color:    "#FF5018",
-		Health:   NewIntStat(16),
-		Damage:   NewIntStat(5),
-		Speed:    NewIntStat(7),
-		Timer:    NewIntStat(20),
-		Accuracy: NewFloatStat(0.8),
-		CritRate: NewFloatStat(0.4),
-		Abilities: [4]Ability{
+		Name:        "Svelte",
+		Color:       "#FF5018",
+		Health:      NewIntStat(16),
+		Damage:      NewIntStat(5),
+		Speed:       NewIntStat(7),
+		AttackTimer: NewIntStat(20),
+		Accuracy:    NewFloatStat(0.8),
+		CritRate:    NewFloatStat(0.4),
+		Abilities: []Ability{
 			{
 				Name: "Most Loved Framework, btw",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
@@ -162,15 +170,15 @@ var fighterList = [...]Fighter{
 		Effects: make([]Effect, 1),
 	},
 	{
-		Name:     "Solid",
-		Color:    "#3E5E88",
-		Health:   NewIntStat(16),
-		Damage:   NewIntStat(6),
-		Speed:    NewIntStat(7),
-		Timer:    NewIntStat(20),
-		Accuracy: NewFloatStat(0.8),
-		CritRate: NewFloatStat(0.3),
-		Abilities: [4]Ability{
+		Name:        "Solid",
+		Color:       "#3E5E88",
+		Health:      NewIntStat(16),
+		Damage:      NewIntStat(6),
+		Speed:       NewIntStat(7),
+		AttackTimer: NewIntStat(20),
+		Accuracy:    NewFloatStat(0.8),
+		CritRate:    NewFloatStat(0.3),
+		Abilities: []Ability{
 			{
 				Name: "Go my signals...",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
@@ -182,15 +190,15 @@ var fighterList = [...]Fighter{
 		Effects: make([]Effect, 1),
 	},
 	{
-		Name:     "HTMX",
-		Color:    "#3D72D7",
-		Health:   NewIntStat(10),
-		Damage:   NewIntStat(10),
-		Speed:    NewIntStat(8),
-		Timer:    NewIntStat(20),
-		Accuracy: NewFloatStat(0.99),
-		CritRate: NewFloatStat(0.4),
-		Abilities: [4]Ability{
+		Name:        "HTMX",
+		Color:       "#3D72D7",
+		Health:      NewIntStat(10),
+		Damage:      NewIntStat(10),
+		Speed:       NewIntStat(8),
+		AttackTimer: NewIntStat(20),
+		Accuracy:    NewFloatStat(0.99),
+		CritRate:    NewFloatStat(0.4),
+		Abilities: []Ability{
 			{
 				Name: "Web 1.0 Larp",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
@@ -209,15 +217,15 @@ var fighterList = [...]Fighter{
 		Effects: make([]Effect, 1),
 	},
 	{
-		Name:     "Datastar",
-		Color:    "#BC4536",
-		Health:   NewIntStat(8),
-		Damage:   NewIntStat(11),
-		Speed:    NewIntStat(9),
-		Timer:    NewIntStat(20),
-		Accuracy: NewFloatStat(0.99),
-		CritRate: NewFloatStat(0.4),
-		Abilities: [4]Ability{
+		Name:        "Datastar",
+		Color:       "#BC4536",
+		Health:      NewIntStat(8),
+		Damage:      NewIntStat(11),
+		Speed:       NewIntStat(9),
+		AttackTimer: NewIntStat(20),
+		Accuracy:    NewFloatStat(0.99),
+		CritRate:    NewFloatStat(0.4),
+		Abilities: []Ability{
 			{
 				Name: "Greedy Dev",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
@@ -261,10 +269,11 @@ func chooseRandomFighterExclusive(excludedFighterName string) (Fighter, error) {
 
 // Effects to apply from abilities to self or an opponent fighter
 
-type Effect interface {
-	OnApply(f *Fighter)
-	OnTick(f *Fighter)
-	OnRemove(f *Fighter)
+type Effect struct {
+	duration   IntStat
+	applyFunc  func(f *Fighter)
+	tickFunc   func(f *Fighter)
+	removeFunc func(f *Fighter)
 }
 
 type Slow struct {

@@ -37,7 +37,7 @@ templ FighterStats(f game.Fighter) {
 		<div>
 			Timer: 
 			// @ProgressBar(f.Timer,game.DEFAULT_TIMER)
-			{f.Timer.Value} / {f.Timer.MaxValue}
+			{f.AttackTimer.Value} / {f.AttackTimer.MaxValue}
 		</div>
 		<div>
 			Accuracy: { strings.Split(fmt.Sprintf("%f",f.Accuracy.Value * 100),".")[0] }% 
