@@ -242,23 +242,23 @@ func (g *GameState) StepGame() {
 	// Update all effect durations on each fighter
 	for i, effect := range g.LeftFighter.Effects {
 		// Reduce effect duration if > 0
-		if effect.duration.Value > 0 {
-			effect.duration.Value -= 1
+		if effect.GetDuration() > 0 {
+			effect.StepDuration()
 		} else {
 			g.LeftFighter.Effects = slices.Delete(g.LeftFighter.Effects, i, i+1)
 		}
 		// Apply tick function on each fighter
-		effect.tickFunc(&g.LeftFighter)
+		effect.OnTick(&g.LeftFighter)
 	}
 	for i, effect := range g.RightFighter.Effects {
 		// Reduce effect duration if > 0
-		if effect.duration.Value > 0 {
-			effect.duration.Value -= 1
+		if effect.GetDuration() > 0 {
+			effect.StepDuration()
 		} else {
 			g.RightFighter.Effects = slices.Delete(g.RightFighter.Effects, i, i+1)
 		}
 		// Apply tick function on each fighter
-		effect.tickFunc(&g.RightFighter)
+		effect.OnTick(&g.RightFighter)
 	}
 
 }

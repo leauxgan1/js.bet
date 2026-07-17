@@ -42,9 +42,10 @@ func NewFloatStat(value float32) FloatStat {
 }
 
 type Ability struct {
-	Name       string
-	InvokeFunc func(self *Fighter, other *Fighter)
-	Timer      IntStat
+	Name        string
+	Description string
+	Timer       IntStat
+	InvokeFunc  func(self *Fighter, other *Fighter)
 }
 
 type Fighter struct {
@@ -69,13 +70,19 @@ func (f *Fighter) Reset() *Fighter {
 
 /* Ability ideas:
 
-React -> Virtual DOM: Increase Speed but reduce damage output slightly, I am inevitable...:
-Vue -> Second-most-loved: Heal a small amount, Vapor mode: Increases Speed and Damage slightly
-Solid -> Signals, signals everywhere...: Gain accuracy and speed
-Svelte -> Compile: Increase speed, Most-loved: Heal a moderate amount
-HTMX -> Out of touch: Increase dodge / Reduce Accuracy, Resilience: Deal damage based on defense
-Datastar -> Greedy: Lose some health / Gain Damage buff
-JQuery -> Old, not forgotten: Deal damage equal to max health
+React -> Virtual DOM: Increase Speed but reduce damage output slightly, I am inevitable...: Deal damage based on popularity [X]
+
+Vue -> Second-most-loved: Heal a small amount, Vapor mode: Increases Speed and Damage slightly []
+
+Solid -> Signals, signals everywhere...: Gain accuracy and speed []
+
+Svelte -> Compile: Increase speed, Most-loved: Heal a moderate amount []
+
+HTMX -> Out of touch: Increase dodge / Reduce Accuracy, Resilience: Deal damage based on defense []
+
+Datastar -> Greedy: Lose some health / Gain Damage buff []
+
+JQuery -> Old, not forgotten: Deal damage equal to max health []
 
 */
 
@@ -111,15 +118,22 @@ var fighterList = [...]Fighter{
 		CritRate:    NewFloatStat(0.2),
 		Abilities: []Ability{
 			{
-				Name: "Virtual DOM",
+				Name:        "Virtual DOM",
+				Description: "Slows everything down",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
-					self.Damage.Value -= 2
-					self.Speed.Value += 2
+					// self.Damage.Value -= 2
+					// self.Speed.Value += 2
+					lastSpeed := other.Speed.Value
+					slow := Slow{NewIntStat(10), 2, lastSpeed}
+					other.Effects = append(other.Effects, &slow)
+					slow.OnApply(other) // Don't forget to run onApply!
+
 				},
 				Timer: NewIntStat(10),
 			},
 			{
-				Name: "I am inevitable...",
+				Name:        "I am inevitable...",
+				Description: "Crushes competition mainly due to inertia",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Damage.MaxValue *= 2
 					self.Damage.Value = self.Damage.MaxValue
@@ -140,11 +154,12 @@ var fighterList = [...]Fighter{
 		CritRate:    NewFloatStat(0.3),
 		Abilities: []Ability{
 			{
-				Name: "Second most loved, btw!",
+				Name:        "Second most loved, btw!",
+				Description: "",
+				Timer:       NewIntStat(10),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
 				},
-				Timer: NewIntStat(10),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -160,11 +175,12 @@ var fighterList = [...]Fighter{
 		CritRate:    NewFloatStat(0.4),
 		Abilities: []Ability{
 			{
-				Name: "Most Loved Framework, btw",
+				Name:        "Most Loved Framework, btw",
+				Description: "",
+				Timer:       NewIntStat(10),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
 				},
-				Timer: NewIntStat(10),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -180,11 +196,12 @@ var fighterList = [...]Fighter{
 		CritRate:    NewFloatStat(0.3),
 		Abilities: []Ability{
 			{
-				Name: "Go my signals...",
+				Name:        "Go my signals...",
+				Description: "",
+				Timer:       NewIntStat(25),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
-				Timer: NewIntStat(25),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -200,18 +217,20 @@ var fighterList = [...]Fighter{
 		CritRate:    NewFloatStat(0.4),
 		Abilities: []Ability{
 			{
-				Name: "Web 1.0 Larp",
+				Name:        "Web 1.0 Larp",
+				Description: "",
+				Timer:       NewIntStat(25),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
-				Timer: NewIntStat(25),
 			},
 			{
-				Name: "Out of touch",
+				Name:        "Out of touch",
+				Description: "",
+				Timer:       NewIntStat(25),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
-				Timer: NewIntStat(25),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -227,11 +246,12 @@ var fighterList = [...]Fighter{
 		CritRate:    NewFloatStat(0.4),
 		Abilities: []Ability{
 			{
-				Name: "Greedy Dev",
+				Name:        "Greedy Dev",
+				Description: "",
+				Timer:       NewIntStat(10),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					//
 				},
-				Timer: NewIntStat(10),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -268,17 +288,26 @@ func chooseRandomFighterExclusive(excludedFighterName string) (Fighter, error) {
 }
 
 // Effects to apply from abilities to self or an opponent fighter
-
-type Effect struct {
-	duration   IntStat
-	applyFunc  func(f *Fighter)
-	tickFunc   func(f *Fighter)
-	removeFunc func(f *Fighter)
+type Effect interface {
+	StepDuration()
+	GetDuration() int
+	OnApply(f *Fighter)
+	OnTick(f *Fighter)
+	OnRemove(f *Fighter)
 }
 
 type Slow struct {
+	duration   IntStat
 	SlowAmount int
 	LastSpeed  int
+}
+
+func (s *Slow) StepDuration() {
+	s.duration.Value -= 1
+}
+
+func (s *Slow) GetDuration() int {
+	return s.duration.Value
 }
 
 func (s *Slow) OnApply(f *Fighter) {
