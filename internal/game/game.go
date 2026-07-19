@@ -90,7 +90,7 @@ func (g *GameState) Act(initiative InitiativeEnum) {
 
 	hit := fighter.CheckHit()
 	damage := fighter.Damage.Value
-	fighter.State = ATTACKING
+	fighter.FighterAnim = "attack"
 	if !hit {
 		g.AudioPlayers.DodgePlaying = true
 		eventlog.EventLog.Write(fmt.Sprintf("%s just missed...", fighter.Name))
@@ -98,14 +98,14 @@ func (g *GameState) Act(initiative InitiativeEnum) {
 	} else {
 		g.AudioPlayers.AttackPlaying = true
 	}
-	oppFighter.State = DEFENDING
+	oppFighter.FighterAnim = "defend"
 	g.AudioPlayers.BlockPlaying = true
 	crit := fighter.CheckCrit()
 	if crit {
 		g.AudioPlayers.AttackPlaying = false
 		g.AudioPlayers.CritPlaying = true
 		damage *= 2.0
-		fighter.State = CRITTING
+		fighter.FighterAnim = "crit"
 		eventlog.EventLog.Write(fmt.Sprintf("%s just critically hit %s for %d", fighter.Name, oppFighter.Name, damage))
 	} else {
 		eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", fighter.Name, oppFighter.Name, damage))
@@ -147,14 +147,14 @@ func useAbility(abilityIdx int, self *Fighter, other *Fighter) {
 	ability := self.Abilities[abilityIdx]
 	ability.InvokeFunc(self, other)
 	eventlog.EventLog.Write(fmt.Sprintf("%s used '%s' ", self.Name, ability.Name))
-	self.Abilities[abilityIdx].Timer.Value = 10
-	self.State = ABILITYUSING //TODO replace State with simple field that matches animation name
+	self.Abilities[abilityIdx].Timer.Value = ability.Timer.MaxValue
+	self.FighterAnim = "ability"
 }
 
 func (g *GameState) StepGame() {
 	g.FrameCount += 1
-	g.RightFighter.State = READY
-	g.LeftFighter.State = READY
+	g.RightFighter.FighterAnim = "idle"
+	g.LeftFighter.FighterAnim = "idle"
 	g.AudioPlayers.Stop()
 
 	// Check for a non-positive health, choose a winner and keep them in the game for the next round
@@ -172,7 +172,6 @@ func (g *GameState) StepGame() {
 	for i := 0; i < len(g.LeftFighter.Abilities); i++ {
 		ability := g.LeftFighter.Abilities[i]
 		g.LeftFighter.Abilities[i].Timer.Value -= 1
-		log.Printf("Ability left exists: %d", ability.Timer.Value)
 		if ability.Timer.Value <= 0 {
 			leftAbilityIdx = i
 		}
@@ -180,7 +179,6 @@ func (g *GameState) StepGame() {
 	for i := 0; i < len(g.RightFighter.Abilities); i++ {
 		ability := g.RightFighter.Abilities[i]
 		g.RightFighter.Abilities[i].Timer.Value -= 1
-		log.Printf("Ability right exists: %d", ability.Timer.Value)
 		if ability.Timer.Value <= 0 {
 			rightAbilityIdx = i
 		}

@@ -5,18 +5,18 @@ import (
 	"math/rand/v2"
 )
 
-type FighterState uint
+// type FighterState uint
 
-const (
-	_ = iota
-	READY
-	DEFENDING
-	DODGING
-	ATTACKING
-	CRITTING
-	DYING
-	ABILITYUSING
-)
+// const (
+// 	_ = iota
+// 	READY
+// 	DEFENDING
+// 	DODGING
+// 	ATTACKING
+// 	CRITTING
+// 	DYING
+// 	ABILITYUSING
+// )
 
 type IntStat struct {
 	Value    int
@@ -50,21 +50,21 @@ type Ability struct {
 }
 
 type Fighter struct {
-	Name        string       // Name of framework/library
-	Color       string       // Color of logo
-	Health      IntStat      // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
-	Damage      IntStat      // Represents how consistently useful the framework/library is for common tasks
-	Speed       IntStat      // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
-	Accuracy    FloatStat    // Represents how simple the library/frame work is / how easy it is to get it right at first (opposite of footguns), causes less misses
-	CritRate    FloatStat    // Represents how suprisingly useful or versatile the framework/library is in niche situations
-	AttackTimer IntStat      // Time before next action of fighter, reduced by speed each turn
-	State       FighterState // Current state of fighter, used for animations
-	Abilities   []Ability    // Abilities which may apply status effects to fighters
-	Effects     []Effect     // Effects which are applied by abilities and tick down over time
+	Name        string    // Name of framework/library
+	Color       string    // Color of logo
+	Health      IntStat   // Represents how much of an "industry standard" the framework/library is / likelihood to stick around in the future
+	Damage      IntStat   // Represents how consistently useful the framework/library is for common tasks
+	Speed       IntStat   // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
+	Accuracy    FloatStat // Represents how simple the library/frame work is / how easy it is to get it right at first (opposite of footguns), causes less misses
+	CritRate    FloatStat // Represents how suprisingly useful or versatile the framework/library is in niche situations
+	AttackTimer IntStat   // Time before next action of fighter, reduced by speed each turn
+	FighterAnim string    // Current Animation playing for fighter
+	Abilities   []Ability // Abilities which may apply status effects to fighters
+	Effects     []Effect  // Effects which are applied by abilities and tick down over time
 }
 
 func (f *Fighter) Reset() *Fighter {
-	f.State = READY
+	f.FighterAnim = "idle"
 	f.Health.Value = f.Health.MaxValue
 	for i := 0; i < len(f.Abilities); i++ {
 		f.Abilities[i].Timer.Value = f.Abilities[i].Timer.MaxValue
@@ -95,6 +95,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "JQuery",
 		Color:       "#0769AD",
+		FighterAnim: "idle",
 		Health:      NewIntStat(40),
 		Damage:      NewIntStat(4),
 		Speed:       NewIntStat(8),
@@ -108,7 +109,7 @@ var fighterList = [...]Fighter{
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
-				Timer: NewIntStat(2),
+				Timer: NewIntStat(10),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -116,6 +117,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "React",
 		Color:       "#58C4DC",
+		FighterAnim: "idle",
 		Health:      NewIntStat(30),
 		Damage:      NewIntStat(5),
 		Speed:       NewIntStat(4),
@@ -135,7 +137,7 @@ var fighterList = [...]Fighter{
 					slow.OnApply(other) // Don't forget to run onApply!
 
 				},
-				Timer: NewIntStat(1),
+				Timer: NewIntStat(5),
 			},
 			{
 				Name:        "I am inevitable...",
@@ -144,7 +146,7 @@ var fighterList = [...]Fighter{
 					self.Damage.MaxValue *= 2
 					self.Damage.Value = self.Damage.MaxValue
 				},
-				Timer: NewIntStat(1),
+				Timer: NewIntStat(8),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -152,6 +154,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "Vue",
 		Color:       "#00C180",
+		FighterAnim: "idle",
 		Health:      NewIntStat(25),
 		Damage:      NewIntStat(5),
 		Speed:       NewIntStat(6),
@@ -162,7 +165,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Second most loved, btw!",
 				Description: "",
-				Timer:       NewIntStat(1),
+				Timer:       NewIntStat(5),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
 				},
@@ -173,6 +176,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "Svelte",
 		Color:       "#FF5018",
+		FighterAnim: "idle",
 		Health:      NewIntStat(26),
 		Damage:      NewIntStat(5),
 		Speed:       NewIntStat(7),
@@ -183,7 +187,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Most Loved Framework, btw",
 				Description: "",
-				Timer:       NewIntStat(1),
+				Timer:       NewIntStat(5),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
 				},
@@ -194,6 +198,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "Solid",
 		Color:       "#3E5E88",
+		FighterAnim: "idle",
 		Health:      NewIntStat(26),
 		Damage:      NewIntStat(6),
 		Speed:       NewIntStat(7),
@@ -204,7 +209,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Go my signals...",
 				Description: "",
-				Timer:       NewIntStat(2),
+				Timer:       NewIntStat(6),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
@@ -215,6 +220,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "HTMX",
 		Color:       "#3D72D7",
+		FighterAnim: "idle",
 		Health:      NewIntStat(20),
 		Damage:      NewIntStat(10),
 		Speed:       NewIntStat(8),
@@ -225,7 +231,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Web 1.0 Larp",
 				Description: "",
-				Timer:       NewIntStat(25),
+				Timer:       NewIntStat(10),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
@@ -233,7 +239,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Out of touch",
 				Description: "",
-				Timer:       NewIntStat(2),
+				Timer:       NewIntStat(5),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
@@ -244,6 +250,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "Datastar",
 		Color:       "#BC4536",
+		FighterAnim: "idle",
 		Health:      NewIntStat(18),
 		Damage:      NewIntStat(11),
 		Speed:       NewIntStat(9),
@@ -254,7 +261,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Greedy Dev",
 				Description: "",
-				Timer:       NewIntStat(1),
+				Timer:       NewIntStat(5),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					//
 				},

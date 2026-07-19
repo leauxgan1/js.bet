@@ -50,38 +50,24 @@ templ FighterStats(f game.Fighter) {
 
 templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 	{{
-		var animationName string
 		var iconID string
-		wounded := fighter.Health.Value <= fighter.Health.MaxValue / 2
-		var defaultAnim string = "bounce"
-		if wounded {
-			defaultAnim = "wounded"
+		var animationName string
+		var woundedAnim string = ""
+		if fighter.Health.Value <= fighter.Health.MaxValue / 2 {
+			woundedAnim = "animate-wounded"
 		}
 
 		var dir string
 		if left {
 			iconID = "left-fighter-icon"
-			dir = "left"
+			dir = "-left"
 		} else {
 			iconID = "right-fighter-icon"
-			dir = "right"
+			dir = "-right"
 		}
-		switch fighter.State {
-			case game.READY:
-				animationName = "animate-" + defaultAnim
-			case game.ATTACKING:
-				animationName = "animate-attack-" + dir
-			case game.CRITTING:
-				animationName = "animate-crit-" + dir
-			case game.DEFENDING:
-				animationName = "animate-defend-" + dir
-			case game.ABILITYUSING:
-				animationName = "animate-ability"
-			default:
-				animationName = "animate-" + defaultAnim
-		}
+		animationName = "animate-" + fighter.FighterAnim + dir 
 	}}
-		<div id={iconID} class={animationName}>
+		<div id={iconID} class={fmt.Sprintf("%s %s", animationName, woundedAnim)}>
 			@templ.Raw(assets.IconsSvgs[fighter.Name])
 		</div>
 }

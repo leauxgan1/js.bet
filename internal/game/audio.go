@@ -1,16 +1,18 @@
 package game
 
 import (
+	"fmt"
 	"strings"
 )
 
 // / Audio struct where true players will play and false will be reset each update
 type AudioPlayer struct {
-	AttackPlaying bool
-	BlockPlaying  bool
-	DodgePlaying  bool
-	CritPlaying   bool
-	WinnerPlaying bool
+	AttackPlaying  bool
+	AbilityPlaying string
+	BlockPlaying   bool
+	DodgePlaying   bool
+	CritPlaying    bool
+	WinnerPlaying  bool
 }
 
 func (a *AudioPlayer) Stop() {
@@ -28,6 +30,9 @@ func (a AudioPlayer) FormatAudioPlayer() string {
 	builder := strings.Builder{}
 	if a.AttackPlaying {
 		builder.Write([]byte("attack,"))
+	}
+	if a.AbilityPlaying != "" {
+		fmt.Fprintf(&builder, "ability-%s,", a.AbilityPlaying)
 	}
 	if a.BlockPlaying {
 		builder.Write([]byte("block,"))

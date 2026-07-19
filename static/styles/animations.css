@@ -1,18 +1,8 @@
-svg {
-	width: 300px;
-	height: auto;
-}
 
-ul {
-	overflow-anchor: auto;
-}
 
-.animate-bounce {
-	animation: bounce 1s infinite;
-}
+/* Keyframe definition */
 
-@keyframes bounce {
-
+@keyframes idle {
 	0%,
 	100% {
 		transform: none;
@@ -25,9 +15,6 @@ ul {
 	}
 }
 
-.animate-wounded {
-	animation: bounce 1s infinite, pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
 
 @keyframes pulse {
 	50% {
@@ -35,15 +22,8 @@ ul {
 	}
 }
 
-.animate-attack-left {
-	animation-name: "attackleft";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
 
 @keyframes attackleft {
-
 	0%,
 	100% {
 		transform: translateX(0) rotateZ(0deg);
@@ -58,15 +38,9 @@ ul {
 	}
 }
 
-.animate-attack-right {
-	animation-name: "attackright";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
+
 
 @keyframes attackright {
-
 	0%,
 	100% {
 		transform: translateX(0) rotateZ(0deg);
@@ -79,13 +53,6 @@ ul {
 	50% {
 		transform: translateX(-75%) rotateZ(-25deg);
 	}
-}
-
-.animate-crit-left {
-	animation-name: "critleft";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes critleft {
@@ -104,13 +71,6 @@ ul {
 	}
 }
 
-.animate-crit-right {
-	animation-name: "critright";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 @keyframes critright {
 
 	0%,
@@ -127,88 +87,42 @@ ul {
 	}
 }
 
-.animate-defend-left {
-	animation-name: "defendleft";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 @keyframes defendleft {
-
 	0%,
 	50%,
 	100% {
 		transform: none;
 	}
-
-	/* 25% { */
-	/* transform: translateX(-40px); */
-	/* transform: translateY(-50px); */
-	/* } */
-
 	70% {
 		transform: translateX(-50px) translateY(-30px);
 	}
 }
 
-.animate-defend-right {
-	animation-name: "defendright";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
+
 
 @keyframes defendright {
-
 	0%,
 	50%,
 	100% {
 		transform: none;
 	}
-
-	/* 25% { */
-	/* transform: translateX(40px); */
-	/* transform: translateY(50px); */
-	/* } */
-
 	70% {
 		transform: translateX(50px) translateY(30px);
 	}
 }
 
 
-.animate-dodge-left {
-	animation-name: "dodgeleft";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 @keyframes dodgeleft {
-
 	0%,
 	25%,
 	100% {
 		transform: none;
 	}
-
-	/* 25% { */
-	/* transform: translateX(-40px); */
-	/* transform: translateY(-50px); */
-	/* } */
-
 	50% {
 		transform: translateX(-50px) translateY(-30px);
 	}
 }
 
-.animate-dodge-right {
-	animation-name: "dodgeright";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
 
 @keyframes dodgeright {
 
@@ -217,25 +131,11 @@ ul {
 	100% {
 		transform: none;
 	}
-
-	/* 25% { */
-	/* transform: translateX(40px); */
-	/* transform: translateY(50px); */
-	/* } */
-
 	50% {
 		transform: translateX(50px) translateY(30px);
 	}
 }
 
-
-
-.animate-ability {
-	animation-name: "ability";
-	animation-duration: 1s;
-	animation-iteration-count: 1;
-	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
 @keyframes ability {
 	from {
 		transform: rotate(0deg);	
@@ -244,4 +144,80 @@ ul {
 		transform: rotate(360deg);	
 	}
 	
+}
+
+/* Styles for animated elements */
+
+svg {
+	width: 300px;
+	height: auto;
+}
+
+ul {
+	overflow-anchor: auto;
+}
+
+/* Styles for signaling animations to run */
+
+.animate-idle-left, .animate-idle-right {
+	animation: idle 1s infinite;
+	&.animate-wounded {
+		animation: idle 1s infinite,pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+}
+.animate-attack-left {
+	animation: attackleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: attackleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+}
+
+.animate-attack-right {
+	animation: attackright 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: attackright 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+
+}
+.animate-crit-left {
+	animation: critleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: critleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+}
+.animate-crit-right {
+	animation: critright 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: critright 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+}
+.animate-defend-left {
+	animation: defendleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: defendleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+}
+.animate-defend-right {
+	animation: defendright 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: defendright 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+}
+.animate-dodge-left {
+	animation: dodgeleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: dodgeleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+}
+.animate-dodge-right {
+	animation: dodgeright 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: dodgeright 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+}
+.animate-ability-left,.animate-ability-right {
+	animation: ability 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+	&.animate-wounded {
+		animation: ability 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
 }
