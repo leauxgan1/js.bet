@@ -75,6 +75,8 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 				animationName = "animate-crit-" + dir
 			case game.DEFENDING:
 				animationName = "animate-defend-" + dir
+			case game.ABILITYUSING:
+				animationName = "animate-ability"
 			default:
 				animationName = "animate-" + defaultAnim
 		}

@@ -15,6 +15,7 @@ const (
 	ATTACKING
 	CRITTING
 	DYING
+	ABILITYUSING
 )
 
 type IntStat struct {
@@ -65,6 +66,10 @@ type Fighter struct {
 func (f *Fighter) Reset() *Fighter {
 	f.State = READY
 	f.Health.Value = f.Health.MaxValue
+	for i := 0; i < len(f.Abilities); i++ {
+		f.Abilities[i].Timer.Value = f.Abilities[i].Timer.MaxValue
+	}
+	f.Effects = make([]Effect, 0, 3)
 	return f
 }
 
@@ -90,7 +95,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "JQuery",
 		Color:       "#0769AD",
-		Health:      NewIntStat(30),
+		Health:      NewIntStat(40),
 		Damage:      NewIntStat(4),
 		Speed:       NewIntStat(8),
 		AttackTimer: NewIntStat(20),
@@ -98,11 +103,12 @@ var fighterList = [...]Fighter{
 		CritRate:    NewFloatStat(0.0),
 		Abilities: []Ability{
 			{
-				Name: "Old But Not Forgotten",
+				Name:        "Old But Not Forgotten",
+				Description: "",
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
-				Timer: NewIntStat(25),
+				Timer: NewIntStat(2),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -110,7 +116,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "React",
 		Color:       "#58C4DC",
-		Health:      NewIntStat(20),
+		Health:      NewIntStat(30),
 		Damage:      NewIntStat(5),
 		Speed:       NewIntStat(4),
 		AttackTimer: NewIntStat(20),
@@ -129,7 +135,7 @@ var fighterList = [...]Fighter{
 					slow.OnApply(other) // Don't forget to run onApply!
 
 				},
-				Timer: NewIntStat(10),
+				Timer: NewIntStat(1),
 			},
 			{
 				Name:        "I am inevitable...",
@@ -138,7 +144,7 @@ var fighterList = [...]Fighter{
 					self.Damage.MaxValue *= 2
 					self.Damage.Value = self.Damage.MaxValue
 				},
-				Timer: NewIntStat(15),
+				Timer: NewIntStat(1),
 			},
 		},
 		Effects: make([]Effect, 0, 3),
@@ -146,7 +152,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "Vue",
 		Color:       "#00C180",
-		Health:      NewIntStat(15),
+		Health:      NewIntStat(25),
 		Damage:      NewIntStat(5),
 		Speed:       NewIntStat(6),
 		AttackTimer: NewIntStat(20),
@@ -156,7 +162,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Second most loved, btw!",
 				Description: "",
-				Timer:       NewIntStat(10),
+				Timer:       NewIntStat(1),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
 				},
@@ -167,7 +173,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "Svelte",
 		Color:       "#FF5018",
-		Health:      NewIntStat(16),
+		Health:      NewIntStat(26),
 		Damage:      NewIntStat(5),
 		Speed:       NewIntStat(7),
 		AttackTimer: NewIntStat(20),
@@ -177,7 +183,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Most Loved Framework, btw",
 				Description: "",
-				Timer:       NewIntStat(10),
+				Timer:       NewIntStat(1),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
 				},
@@ -188,7 +194,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "Solid",
 		Color:       "#3E5E88",
-		Health:      NewIntStat(16),
+		Health:      NewIntStat(26),
 		Damage:      NewIntStat(6),
 		Speed:       NewIntStat(7),
 		AttackTimer: NewIntStat(20),
@@ -198,7 +204,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Go my signals...",
 				Description: "",
-				Timer:       NewIntStat(25),
+				Timer:       NewIntStat(2),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
@@ -209,7 +215,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "HTMX",
 		Color:       "#3D72D7",
-		Health:      NewIntStat(10),
+		Health:      NewIntStat(20),
 		Damage:      NewIntStat(10),
 		Speed:       NewIntStat(8),
 		AttackTimer: NewIntStat(20),
@@ -227,7 +233,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Out of touch",
 				Description: "",
-				Timer:       NewIntStat(25),
+				Timer:       NewIntStat(2),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					other.Health.Value -= self.Health.MaxValue
 				},
@@ -238,7 +244,7 @@ var fighterList = [...]Fighter{
 	{
 		Name:        "Datastar",
 		Color:       "#BC4536",
-		Health:      NewIntStat(8),
+		Health:      NewIntStat(18),
 		Damage:      NewIntStat(11),
 		Speed:       NewIntStat(9),
 		AttackTimer: NewIntStat(20),
@@ -248,7 +254,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Greedy Dev",
 				Description: "",
-				Timer:       NewIntStat(10),
+				Timer:       NewIntStat(1),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					//
 				},

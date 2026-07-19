@@ -227,3 +227,21 @@ ul {
 		transform: translateX(50px) translateY(30px);
 	}
 }
+
+
+
+.animate-ability {
+	animation-name: "ability";
+	animation-duration: 1s;
+	animation-iteration-count: 1;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes ability {
+	from {
+		transform: rotate(0deg);	
+	}
+	to{
+		transform: rotate(360deg);	
+	}
+	
+}

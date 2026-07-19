@@ -303,6 +303,8 @@ func FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) templ.Co
 			animationName = "animate-crit-" + dir
 		case game.DEFENDING:
 			animationName = "animate-defend-" + dir
+		case game.ABILITYUSING:
+			animationName = "animate-ability"
 		default:
 			animationName = "animate-" + defaultAnim
 		}
@@ -318,7 +320,7 @@ func FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) templ.Co
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(iconID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 82, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 84, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -386,7 +388,7 @@ func EventLog(f eventlog.FighterEventLog) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("event-%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 90, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 92, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -399,7 +401,7 @@ func EventLog(f eventlog.FighterEventLog) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(i)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 91, Col: 6}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 93, Col: 6}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -412,7 +414,7 @@ func EventLog(f eventlog.FighterEventLog) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(item)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 91, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 93, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -459,7 +461,7 @@ func Popup(info string) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(info)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 99, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/game.templ`, Line: 101, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {

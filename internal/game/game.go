@@ -86,7 +86,6 @@ func (g *GameState) Act(initiative InitiativeEnum) {
 	}
 
 	// Action logic
-
 	fighter.AttackTimer.Value = fighter.AttackTimer.MaxValue // Reset timer
 
 	hit := fighter.CheckHit()
@@ -144,6 +143,14 @@ func determineWinner(left Fighter, right Fighter) WinnerEnum {
 	return NEITHER
 }
 
+func useAbility(abilityIdx int, self *Fighter, other *Fighter) {
+	ability := self.Abilities[abilityIdx]
+	ability.InvokeFunc(self, other)
+	eventlog.EventLog.Write(fmt.Sprintf("%s used '%s' ", self.Name, ability.Name))
+	self.Abilities[abilityIdx].Timer.Value = 10
+	self.State = ABILITYUSING //TODO replace State with simple field that matches animation name
+}
+
 func (g *GameState) StepGame() {
 	g.FrameCount += 1
 	g.RightFighter.State = READY
@@ -158,48 +165,79 @@ func (g *GameState) StepGame() {
 		return
 	}
 
-	// Check if an ability is ready on each fighter to see if they should use it
-	// > Prioritize first found abiity in list
-	// > Prioritize fighter with lower cooldown
-	var leftFighterAbility *Ability
-	var rightFighterAbility *Ability
+	// Check if an ability is ready on each fighter to see if they should use it, prioritize ability usage over attacks
+	var leftAbilityIdx int = -1
+	var rightAbilityIdx int = -1
+	// Update all ability timers on each fighter
+	for i := 0; i < len(g.LeftFighter.Abilities); i++ {
+		ability := g.LeftFighter.Abilities[i]
+		g.LeftFighter.Abilities[i].Timer.Value -= 1
+		log.Printf("Ability left exists: %d", ability.Timer.Value)
+		if ability.Timer.Value <= 0 {
+			leftAbilityIdx = i
+		}
+	}
+	for i := 0; i < len(g.RightFighter.Abilities); i++ {
+		ability := g.RightFighter.Abilities[i]
+		g.RightFighter.Abilities[i].Timer.Value -= 1
+		log.Printf("Ability right exists: %d", ability.Timer.Value)
+		if ability.Timer.Value <= 0 {
+			rightAbilityIdx = i
+		}
+	}
 
-	for _, ability := range g.LeftFighter.Abilities {
-		if ability.Timer.Value <= 0 {
-			leftFighterAbility = &ability
+	// Update all effect durations on each fighter
+	for i, effect := range g.LeftFighter.Effects {
+		// Reduce effect duration if > 0
+		if effect.GetDuration() > 0 {
+			effect.StepDuration()
+		} else {
+			g.LeftFighter.Effects = slices.Delete(g.LeftFighter.Effects, i, i+1)
 		}
+		// Apply tick function on each fighter
+		effect.OnTick(&g.LeftFighter)
 	}
-	for _, ability := range g.RightFighter.Abilities {
-		if ability.Timer.Value <= 0 {
-			rightFighterAbility = &ability
+	for i, effect := range g.RightFighter.Effects {
+		// Reduce effect duration if > 0
+		if effect.GetDuration() > 0 {
+			effect.StepDuration()
+		} else {
+			g.RightFighter.Effects = slices.Delete(g.RightFighter.Effects, i, i+1)
 		}
+		// Apply tick function on each fighter
+		effect.OnTick(&g.RightFighter)
 	}
-	if leftFighterAbility != nil {
-		if rightFighterAbility != nil {
-			if leftFighterAbility.Timer.Value > rightFighterAbility.Timer.Value {
-				rightFighterAbility.InvokeFunc(&g.RightFighter, &g.LeftFighter)
-			} else if leftFighterAbility.Timer.Value < rightFighterAbility.Timer.Value {
-				leftFighterAbility.InvokeFunc(&g.LeftFighter, &g.RightFighter)
+
+	// Prioritize using an ability first and then exiting
+	if leftAbilityIdx != -1 || rightAbilityIdx != -1 {
+		if leftAbilityIdx != -1 && rightAbilityIdx != -1 {
+			leftAbility := g.LeftFighter.Abilities[leftAbilityIdx]
+			rightAbility := g.RightFighter.Abilities[rightAbilityIdx]
+			if leftAbility.Timer.Value < rightAbility.Timer.Value {
+				useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter)
+			} else if leftAbility.Timer.Value > rightAbility.Timer.Value {
+				useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter)
 			} else {
 				rand := rand.Float32() // Choose randomly on second tie
 				if rand < 0.5 {        // Left fighter acts
-					leftFighterAbility.InvokeFunc(&g.LeftFighter, &g.RightFighter)
+					useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter)
 				} else { // Right fighter acts
-					rightFighterAbility.InvokeFunc(&g.RightFighter, &g.LeftFighter)
+					useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter)
 				}
 			}
-			return
+		} else if leftAbilityIdx != -1 {
+			useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter)
+		} else { // Right ability is not nil
+			useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter)
 		}
-		leftFighterAbility.InvokeFunc(&g.LeftFighter, &g.RightFighter)
-		return
+		return // Return regardless to not double dip
 	}
-	if rightFighterAbility != nil {
-		rightFighterAbility.InvokeFunc(&g.RightFighter, &g.LeftFighter)
-		return
-	}
+
+	// Step forward each fighter's attack timer
+	g.LeftFighter.AttackTimer.Value -= g.LeftFighter.Speed.Value
+	g.RightFighter.AttackTimer.Value -= g.RightFighter.Speed.Value
 
 	// Todo: Skip doing attack when ability was used
-
 	lReady := g.LeftFighter.AttackTimer.Value <= 0
 	rReady := g.RightFighter.AttackTimer.Value <= 0
 
@@ -227,38 +265,4 @@ func (g *GameState) StepGame() {
 	} else if rReady {
 		g.Act(RIGHT_TO_LEFT)
 	}
-
-	g.LeftFighter.AttackTimer.Value -= g.LeftFighter.Speed.Value
-	g.RightFighter.AttackTimer.Value -= g.RightFighter.Speed.Value
-
-	// Update all ability timers on each fighter
-	for _, ability := range g.LeftFighter.Abilities {
-		ability.Timer.Value -= 0
-	}
-	for _, ability := range g.RightFighter.Abilities {
-		ability.Timer.Value -= 0
-	}
-
-	// Update all effect durations on each fighter
-	for i, effect := range g.LeftFighter.Effects {
-		// Reduce effect duration if > 0
-		if effect.GetDuration() > 0 {
-			effect.StepDuration()
-		} else {
-			g.LeftFighter.Effects = slices.Delete(g.LeftFighter.Effects, i, i+1)
-		}
-		// Apply tick function on each fighter
-		effect.OnTick(&g.LeftFighter)
-	}
-	for i, effect := range g.RightFighter.Effects {
-		// Reduce effect duration if > 0
-		if effect.GetDuration() > 0 {
-			effect.StepDuration()
-		} else {
-			g.RightFighter.Effects = slices.Delete(g.RightFighter.Effects, i, i+1)
-		}
-		// Apply tick function on each fighter
-		effect.OnTick(&g.RightFighter)
-	}
-
 }
