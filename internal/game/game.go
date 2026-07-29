@@ -8,18 +8,12 @@ import (
 	"slices"
 )
 
-type Action struct {
-	Direction InitiativeEnum
-	WasHit    bool
-	WasCrit   bool
-}
-
 type GameState struct {
 	LeftFighter  Fighter
 	RightFighter Fighter
 	Winner       WinnerEnum
 	FrameCount   int
-	LastAction   Action
+	LastAction   string
 	AudioPlayers AudioPlayer
 }
 
@@ -143,12 +137,13 @@ func determineWinner(left Fighter, right Fighter) WinnerEnum {
 	return NEITHER
 }
 
-func useAbility(abilityIdx int, self *Fighter, other *Fighter) {
+func useAbility(abilityIdx int, self *Fighter, other *Fighter, gs *GameState) {
 	ability := self.Abilities[abilityIdx]
 	ability.InvokeFunc(self, other)
 	eventlog.EventLog.Write(fmt.Sprintf("%s used '%s' ", self.Name, ability.Name))
 	self.Abilities[abilityIdx].Timer.Value = ability.Timer.MaxValue
 	self.FighterAnim = "ability"
+	gs.LastAction = ability.Name
 }
 
 func (g *GameState) StepGame() {
@@ -212,21 +207,21 @@ func (g *GameState) StepGame() {
 			leftAbility := g.LeftFighter.Abilities[leftAbilityIdx]
 			rightAbility := g.RightFighter.Abilities[rightAbilityIdx]
 			if leftAbility.Timer.Value < rightAbility.Timer.Value {
-				useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter)
+				useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter, g)
 			} else if leftAbility.Timer.Value > rightAbility.Timer.Value {
-				useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter)
+				useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter, g)
 			} else {
 				rand := rand.Float32() // Choose randomly on second tie
 				if rand < 0.5 {        // Left fighter acts
-					useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter)
+					useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter, g)
 				} else { // Right fighter acts
-					useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter)
+					useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter, g)
 				}
 			}
 		} else if leftAbilityIdx != -1 {
-			useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter)
+			useAbility(leftAbilityIdx, &g.LeftFighter, &g.RightFighter, g)
 		} else { // Right ability is not nil
-			useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter)
+			useAbility(rightAbilityIdx, &g.RightFighter, &g.LeftFighter, g)
 		}
 		return // Return regardless to not double dip
 	}

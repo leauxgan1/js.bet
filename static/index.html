@@ -1,58 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-	<link href="/styles/open-props.min.css" type="text/css" rel="stylesheet">
-	<link href="/styles/normalize.min.css" type="text/css" rel="stylesheet">
-	<link href="/styles/buttons.min.css" type="text/css" rel="stylesheet">
-	<link href="/styles/index.css" type="text/css" rel="stylesheet">
-	<link href="/styles/animations.css" type="text/css" rel="stylesheet">
-	<link href="/styles/eventlog.css" type="text/css" rel="stylesheet">
-	<link href="/styles/fightersides.css" type="text/css" rel="stylesheet">
-	<title> Js-bet </title>
-	<script src="/js/htmx.min.js"></script>
-	<script src="/js/hx-sse.min.js"></script>
-	<!-- <script src="https://cdn.jsdelivr.net/npm/htmx.org@next/dist/htmx.min.js"></script> -->
-	<!-- <script src="https://cdn.jsdelivr.net/npm/htmx.org@next/dist/ext/hx-sse.js"></script> -->
-	<script defer src="/js/audio.js"></script>
-	<!-- <script> -->
-	<!-- htmx.config.defaultFocusScroll = true; -->
-	<!-- </script> -->
-</head>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+		<link href="/styles/open-props.min.css" type="text/css" rel="stylesheet">
+		<link href="/styles/normalize.min.css" type="text/css" rel="stylesheet">
+		<link href="/styles/buttons.min.css" type="text/css" rel="stylesheet">
+		<link href="/styles/index.css" type="text/css" rel="stylesheet">
+		<link href="/styles/animations.css" type="text/css" rel="stylesheet">
+		<link href="/styles/eventlog.css" type="text/css" rel="stylesheet">
+		<link href="/styles/fightersides.css" type="text/css" rel="stylesheet">
+		<title>
+			Js-bet
+		</title>
+		<script src="/js/htmx.min.js"></script>
+		<script src="/js/hx-sse.min.js"></script>
+		<!-- <script src="https://cdn.jsdelivr.net/npm/htmx.org@next/dist/htmx.min.js"></script> -->
+		<!-- <script src="https://cdn.jsdelivr.net/npm/htmx.org@next/dist/ext/hx-sse.js"></script> -->
+		<script defer src="/js/audio.js"></script>
+		<!-- <script> -->
+		<!-- htmx.config.defaultFocusScroll = true; -->
+		<!-- </script> -->
+	</head>
 
-<body>
-	<nav id="nav-header" data-hx-boost:inherited="true">
-		<a href="/user/about"> About</a>
-		<a href="/user/stats"> Stats</a>
-		<h1>Js.Bet</h1>
-		<a href="/user/login"> Login</a>
-		<a href="https://github.com/leauxgan1/js.bet">Source</a>
-	</nav>
-	<div id="game" data-hx-sse:connect="/game" data-hx-swap="innerMorph">
-		<div id="fighter-sides"></div>
-		<div id="eventlog"></div>
-		<div id="audio-players">
+	<body>
+		<nav id="nav-header" data-hx-boost:inherited="true">
+			<a href="/user/about">
+				About
+			</a>
+			<a href="/user/stats">
+				Stats
+			</a>
+			<h1>Js.Bet</h1>
+			<a href="/user/login">
+				Login
+			</a>
+			<a href="https://github.com/leauxgan1/js.bet">Source</a>
+		</nav>
+		<div id="game" data-hx-sse:connect="/game" data-hx-swap="innerMorph">
+			<div id="fighter-sides"></div>
+			<div id="eventlog"></div>
+			<div id="audio-players">
+			</div>
 		</div>
-	</div>
 
-	<div id="left-bet" class="bet">
-		<h5>Bet on Left</h5>
-		<form data-hx-post="/placeBet">
-			<input hidden name="betside" value="left">
-			<input required name="betamount" placeholder="10" type="number">
-			<button>Place Bet</button>
-		</form>
-	</div>
-	<div id="right-bet" class="bet">
-		<h5>Bet on Right</h5>
-		<form data-hx-post="/placeBet">
-			<input hidden name="betside" value="right">
-			<input required name="betamount" placeholder="10" type="number">
-			<button>Place Bet</button>
-		</form>
-	</div>
-
-</body>
-
+		<div id="left-bet" class="bet">
+			<h5>Bet on Left</h5>
+			<form action="/placeBet" method="post" data-hx-post="/placeBet" data-hx-swap="beforeend">
+				<input hidden name="betside" value="left">
+				<input required name="betamount" placeholder="10" type="number">
+				<button>Place Bet</button>
+			</form>
+		</div>
+		<div id="right-bet" class="bet">
+			<h5>Bet on Right</h5>
+			<form action="/placeBet" method="post" data-hx-post="/placeBet" data-hx-swap="beforeend">
+				<input hidden name="betside" value="right">
+				<input required name="betamount" placeholder="10" type="number">
+				<button>Place Bet</button>
+			</form>
+		</div>
+	</body>
 </html>

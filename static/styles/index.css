@@ -1,7 +1,3 @@
-/* @import "https://unpkg.com/open-props"; */
-/* @import "https://unpkg.com/open-props/normalize.min.css"; */
-/* @import "https://unpkg.com/open-props/buttons.min.css"; */
-
 :root {
   --primary: hsl(200 80% 50%);
   --secondary: hsl(200 80% 80%);
@@ -134,4 +130,10 @@ nav {
 
 #right-bet {
   left: 70%;
+}
+
+#fight-header {
+  position: fixed;
+  left: 30%;
+  top: 50%;
 }

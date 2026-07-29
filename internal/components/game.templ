@@ -11,12 +11,17 @@ import (
 // Need a section for Fight status (Pre fight, in progress, result + bet rewards)
 
 templ FighterSides(gameState game.GameState, assets assets.Assets) {
+	@FightHeader(gameState)
 	<div id="fighter-sides" data-audios={gameState.AudioPlayers.FormatAudioPlayer()} style={fmt.Sprintf("--left-gradient-color: %s;--right-gradient-color:%s;", gameState.LeftFighter.Color, gameState.RightFighter.Color)}>
 			@FighterStats(gameState.LeftFighter)
 			@FighterIcon(gameState.LeftFighter,true,assets)
 			@FighterIcon(gameState.RightFighter,false,assets)
 			@FighterStats(gameState.RightFighter)
 	</div>
+}
+
+templ FightHeader(g game.GameState) {
+	<h1 id="fight-header"> {"Test Header"} </h1>
 }
 
 templ FighterStats(f game.Fighter) {
