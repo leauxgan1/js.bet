@@ -21,7 +21,7 @@ templ FighterSides(gameState game.GameState, assets assets.Assets) {
 }
 
 templ FightHeader(g game.GameState) {
-	<h1 id="fight-header"> {"Test Header"} </h1>
+	<h1 id="fight-header"> {g.Status} </h1>
 }
 
 templ FighterStats(f game.Fighter) {

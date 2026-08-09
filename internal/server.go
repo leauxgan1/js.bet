@@ -298,13 +298,10 @@ func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		return
 	}
-
 	r.ParseForm()
-
 	if r.Form == nil {
 		log.Panic("Unable to parse form")
 	}
-
 	betAmount, err := strconv.Atoi(r.FormValue("betamount"))
 	if err != nil {
 		log.Panic("Unable to determine bet amount from form values")
@@ -312,12 +309,5 @@ func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 	game.SetBet("TempUsername", betAmount)
 
 	fmt.Fprintf(w, "Place bet amount for $%d", betAmount)
-
-	// var betInfo betShape
-	// err := decoder.Decode(&betInfo)
-	// if err != nil {
-	// 	log.Panicf("Unable to decode json request: %v", err)
-	// }
-	// log.Printf("Received amount: %d and side %s", betInfo.BetAmount, betInfo.BetSide)
 
 }

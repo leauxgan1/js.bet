@@ -8,12 +8,15 @@ import (
 	"slices"
 )
 
+// Statistical Consts
+const CRIT_MULTIPLIER = 2.0
+
 type GameState struct {
 	LeftFighter  Fighter
 	RightFighter Fighter
 	Winner       WinnerEnum
 	FrameCount   int
-	LastAction   string
+	Status       string
 	AudioPlayers AudioPlayer
 }
 
@@ -62,23 +65,7 @@ const (
 
 type InitiativeEnum uint
 
-const (
-	LEFT_TO_RIGHT = 0
-	RIGHT_TO_LEFT = 1
-)
-
-func (g *GameState) Act(initiative InitiativeEnum) {
-	// Determine acting direction based on initiative enum
-	var fighter *Fighter
-	var oppFighter *Fighter
-	if initiative == LEFT_TO_RIGHT {
-		fighter = &g.LeftFighter
-		oppFighter = &g.RightFighter
-	} else { // RIGHT_TO_LEFT
-		fighter = &g.RightFighter
-		oppFighter = &g.LeftFighter
-	}
-
+func (g *GameState) Act(fighter *Fighter, oppFighter *Fighter) {
 	// Action logic
 	fighter.AttackTimer.Value = fighter.AttackTimer.MaxValue // Reset timer
 
@@ -105,6 +92,7 @@ func (g *GameState) Act(initiative InitiativeEnum) {
 		eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", fighter.Name, oppFighter.Name, damage))
 	}
 	oppFighter.Health.Value -= damage
+	g.Status = fmt.Sprintf("%s attacked %s", fighter.Name, oppFighter.Name)
 }
 
 func (f Fighter) CheckHit() bool {
@@ -143,7 +131,7 @@ func useAbility(abilityIdx int, self *Fighter, other *Fighter, gs *GameState) {
 	eventlog.EventLog.Write(fmt.Sprintf("%s used '%s' ", self.Name, ability.Name))
 	self.Abilities[abilityIdx].Timer.Value = ability.Timer.MaxValue
 	self.FighterAnim = "ability"
-	gs.LastAction = ability.Name
+	gs.Status = fmt.Sprintf("%s used '%s'", self.Name, ability.Name)
 }
 
 func (g *GameState) StepGame() {
@@ -239,23 +227,23 @@ func (g *GameState) StepGame() {
 			if g.LeftFighter.Speed.Value == g.RightFighter.Speed.Value {
 				rand := rand.Float32() // Choose randomly on second tie
 				if rand < 0.5 {        // Left fighter acts
-					g.Act(LEFT_TO_RIGHT)
+					g.Act(&g.LeftFighter, &g.RightFighter)
 				} else { // Right fighter acts
-					g.Act(RIGHT_TO_LEFT)
+					g.Act(&g.RightFighter, &g.LeftFighter)
 				}
 			} else if g.LeftFighter.Speed.Value > g.RightFighter.Speed.Value {
-				g.Act(LEFT_TO_RIGHT)
+				g.Act(&g.LeftFighter, &g.RightFighter)
 			} else {
-				g.Act(RIGHT_TO_LEFT)
+				g.Act(&g.RightFighter, &g.LeftFighter)
 			}
 		} else if g.LeftFighter.AttackTimer.Value < g.RightFighter.AttackTimer.Value {
-			g.Act(LEFT_TO_RIGHT)
+			g.Act(&g.LeftFighter, &g.RightFighter)
 		} else { // g.RightFighter.AttackTimer < g.LeftFighter.AttackTimer
-			g.Act(RIGHT_TO_LEFT)
+			g.Act(&g.RightFighter, &g.LeftFighter)
 		}
 	} else if lReady {
-		g.Act(LEFT_TO_RIGHT)
+		g.Act(&g.LeftFighter, &g.RightFighter)
 	} else if rReady {
-		g.Act(RIGHT_TO_LEFT)
+		g.Act(&g.RightFighter, &g.LeftFighter)
 	}
 }
