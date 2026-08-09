@@ -66,9 +66,9 @@ const (
 type InitiativeEnum uint
 
 func (g *GameState) Act(fighter *Fighter, oppFighter *Fighter) {
-	// Action logic
+	// Reset actor's attack timer to its maximum
 	fighter.AttackTimer.Value = fighter.AttackTimer.MaxValue // Reset timer
-
+	// Determine if hit was confirmed
 	hit := fighter.CheckHit()
 	damage := fighter.Damage.Value
 	fighter.FighterAnim = "attack"
@@ -92,6 +92,8 @@ func (g *GameState) Act(fighter *Fighter, oppFighter *Fighter) {
 		eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", fighter.Name, oppFighter.Name, damage))
 	}
 	oppFighter.Health.Value -= damage
+
+	// Add message to the status bar
 	g.Status = fmt.Sprintf("%s attacked %s", fighter.Name, oppFighter.Name)
 }
 
