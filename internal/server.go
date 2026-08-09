@@ -104,10 +104,6 @@ func runGame(gs game.GameState, hub *Hub) {
 		buffer.Reset()
 
 		gs.StepGame()
-		// log.Printf("GameState is %v\n", gs)
-		// if gs.Winner ==  {
-		// 	// Create new game as gs
-		// }
 
 		if len(sseHub.clients) > 0 {
 			// Render new gamestate into html for all clients

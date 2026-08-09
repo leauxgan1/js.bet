@@ -12,11 +12,17 @@ import (
 
 templ FighterSides(gameState game.GameState, assets assets.Assets) {
 	@FightHeader(gameState)
-	<div id="fighter-sides" data-audios={gameState.AudioPlayers.FormatAudioPlayer()} style={fmt.Sprintf("--left-gradient-color: %s;--right-gradient-color:%s;", gameState.LeftFighter.Color, gameState.RightFighter.Color)}>
-			@FighterStats(gameState.LeftFighter)
-			@FighterIcon(gameState.LeftFighter,true,assets)
-			@FighterIcon(gameState.RightFighter,false,assets)
-			@FighterStats(gameState.RightFighter)
+	<div id="fighter-sides" data-audios={gameState.AudioPlayers.FormatAudioPlayer()} style={fmt.Sprintf("--left-gradient-color: %s;--right-gradient-color:%s;", gameState.Fighters[0].Color, gameState.Fighters[1].Color)}>
+			@FighterStats(gameState.Fighters[0])
+				if gameState.Winner == 1 {
+					@FighterIcon(gameState.Fighters[0],true,assets)
+				} else if gameState.Winner == 2 {
+					@FighterIcon(gameState.Fighters[1],false,assets)
+				} else {
+					@FighterIcon(gameState.Fighters[0],true,assets)
+					@FighterIcon(gameState.Fighters[1],false,assets)
+				}
+			@FighterStats(gameState.Fighters[1])
 	</div>
 }
 
