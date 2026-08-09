@@ -77,40 +77,48 @@ const (
 	POSTROUND
 )
 
-func (g *GameState) Act(fighter *Fighter, oppFighter *Fighter) {
+func (g *GameState) Act(order ActingOrder) {
+	fighterIdx := 0
+	oppIdx := 1
+	switch order {
+	case RIGHTTOLEFT:
+		fighterIdx = 1
+		oppIdx = 0
+	}
 	// Reset actor's attack timer to its maximum
-	fighter.AttackTimer.Value = fighter.AttackTimer.MaxValue // Reset timer
+	g.Fighters[fighterIdx].AttackTimer.Value = g.Fighters[fighterIdx].AttackTimer.MaxValue // Reset timer
 	// Determine if hit was confirmed
-	hit := fighter.CheckHit()
-	damage := fighter.Damage.Value
-	fighter.FighterAnim = "attack"
+	hit := g.Fighters[fighterIdx].CheckHit(0.0)
+	damage := g.Fighters[fighterIdx].Damage.Value
+	g.Fighters[fighterIdx].FighterAnim = "attack"
 	if !hit {
 		g.AudioPlayers.DodgePlaying = true
-		eventlog.EventLog.Write(fmt.Sprintf("%s just missed...", fighter.Name))
+		eventlog.EventLog.Write(fmt.Sprintf("%s just missed...", g.Fighters[fighterIdx].Name))
+		// Add message to the status bar
+		g.Status = fmt.Sprintf("%s attacked %s and missed!", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name)
 		return
 	} else {
 		g.AudioPlayers.AttackPlaying = true
+		// Add message to the status bar
+		g.Status = fmt.Sprintf("%s attacked %s", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name)
 	}
-	oppFighter.FighterAnim = "defend"
+	g.Fighters[oppIdx].FighterAnim = "defend"
 	g.AudioPlayers.BlockPlaying = true
-	crit := fighter.CheckCrit()
+	crit := g.Fighters[fighterIdx].CheckCrit()
 	if crit {
 		g.AudioPlayers.AttackPlaying = false
 		g.AudioPlayers.CritPlaying = true
 		damage *= 2.0
-		fighter.FighterAnim = "crit"
-		eventlog.EventLog.Write(fmt.Sprintf("%s just critically hit %s for %d", fighter.Name, oppFighter.Name, damage))
+		g.Fighters[fighterIdx].FighterAnim = "crit"
+		eventlog.EventLog.Write(fmt.Sprintf("%s just critically hit %s for %d", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name, damage))
 	} else {
-		eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", fighter.Name, oppFighter.Name, damage))
+		eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name, damage))
 	}
-	oppFighter.Health.Value -= damage
-
-	// Add message to the status bar
-	g.Status = fmt.Sprintf("%s attacked %s", fighter.Name, oppFighter.Name)
+	g.Fighters[oppIdx].Health.Value -= damage
 }
 
-func (f Fighter) CheckHit() bool {
-	if f.Accuracy.Value > 0.0 && rand.Float32() < f.Accuracy.Value {
+func (f Fighter) CheckHit(dodgeRate float32) bool {
+	if f.Accuracy.Value > 0.0 && rand.Float32() < f.Accuracy.Value-dodgeRate {
 		return true
 	}
 	return false
@@ -124,7 +132,9 @@ func (f Fighter) CheckCrit() bool {
 }
 
 // TODO add sound for winner being determined
-func determineWinner(left Fighter, right Fighter) WinnerEnum {
+func (g *GameState) determineWinner() WinnerEnum {
+	left := g.Fighters[0]
+	right := g.Fighters[1]
 	if left.Health.Value <= 0 && right.Health.Value <= 0 {
 		if left.Health.Value < right.Health.Value {
 			return RIGHT
@@ -178,7 +188,7 @@ func (g *GameState) StepGame() {
 	g.AudioPlayers.Stop()
 
 	// Check for a non-positive health, choose a winner and keep them in the game for the next round
-	var winner = determineWinner(g.Fighters[0], g.Fighters[1])
+	var winner = g.determineWinner()
 	if winner != NEITHER {
 		g.Winner = winner
 		g.Phase = POSTROUND
@@ -195,46 +205,32 @@ func (g *GameState) StepGame() {
 	}
 
 	// Check if an ability is ready on each fighter to see if they should use it, prioritize ability usage over attacks
-	var leftAbilityIdx int = -1
-	var rightAbilityIdx int = -1
+	usedAbilityIdxs := [2]int{-1, -1}
 
-	// Update all ability timers on each fighter
-	for i := 0; i < len(g.Fighters[0].Abilities); i++ {
-		ability := g.Fighters[0].Abilities[i]
-		g.Fighters[0].Abilities[i].Timer.Value -= 1
-		if ability.Timer.Value <= 0 {
-			leftAbilityIdx = i
+	// For each fighter...
+	for fIdx := 0; fIdx < 2; fIdx += 1 {
+		// Update all effect durations on each fighter
+		for i, effect := range g.Fighters[fIdx].Effects {
+			// Reduce effect duration if > 0
+			if effect.GetDuration() > 0 {
+				effect.StepDuration()
+			} else {
+				g.Fighters[fIdx].Effects = slices.Delete(g.Fighters[fIdx].Effects, i, i+1)
+			}
+			// Apply tick function on each fighter
+			effect.OnTick(&g.Fighters[0])
+		}
+		// Update all ability timers on each fighter
+		for i := 0; i < len(g.Fighters[fIdx].Abilities); i++ {
+			ability := g.Fighters[fIdx].Abilities[i]
+			g.Fighters[fIdx].Abilities[i].Timer.Value -= 1
+			if ability.Timer.Value <= 0 {
+				usedAbilityIdxs[fIdx] = i
+			}
 		}
 	}
-	for i := 0; i < len(g.Fighters[1].Abilities); i++ {
-		ability := g.Fighters[1].Abilities[i]
-		g.Fighters[1].Abilities[i].Timer.Value -= 1
-		if ability.Timer.Value <= 0 {
-			rightAbilityIdx = i
-		}
-	}
-
-	// Update all effect durations on each fighter
-	for i, effect := range g.Fighters[0].Effects {
-		// Reduce effect duration if > 0
-		if effect.GetDuration() > 0 {
-			effect.StepDuration()
-		} else {
-			g.Fighters[0].Effects = slices.Delete(g.Fighters[0].Effects, i, i+1)
-		}
-		// Apply tick function on each fighter
-		effect.OnTick(&g.Fighters[0])
-	}
-	for i, effect := range g.Fighters[1].Effects {
-		// Reduce effect duration if > 0
-		if effect.GetDuration() > 0 {
-			effect.StepDuration()
-		} else {
-			g.Fighters[1].Effects = slices.Delete(g.Fighters[1].Effects, i, i+1)
-		}
-		// Apply tick function on each fighter
-		effect.OnTick(&g.Fighters[1])
-	}
+	var leftAbilityIdx int = usedAbilityIdxs[0]
+	var rightAbilityIdx int = usedAbilityIdxs[1]
 
 	// Prioritize using an ability first and then exiting
 	if leftAbilityIdx != -1 || rightAbilityIdx != -1 {
@@ -258,14 +254,32 @@ func (g *GameState) StepGame() {
 		} else { // Right ability is not nil
 			useAbility(rightAbilityIdx, &g.Fighters[1], &g.Fighters[0], g)
 		}
-		return // Return regardless to not double dip
+		return // Return regardless to not double dip on abilities and attacks
 	}
 
 	// Step forward each fighter's attack timer
 	g.Fighters[0].AttackTimer.Value -= g.Fighters[0].Speed.Value
 	g.Fighters[1].AttackTimer.Value -= g.Fighters[1].Speed.Value
 
-	// Todo: Skip doing attack when ability was used
+	order := g.determineActingOrder()
+	switch order {
+	case NOT_READY:
+		break
+	default:
+		g.Act(order)
+	}
+}
+
+type ActingOrder uint
+
+const (
+	_ = iota
+	LEFTTORIGHT
+	RIGHTTOLEFT
+	NOT_READY
+)
+
+func (g *GameState) determineActingOrder() ActingOrder {
 	lReady := g.Fighters[0].AttackTimer.Value <= 0
 	rReady := g.Fighters[1].AttackTimer.Value <= 0
 
@@ -274,27 +288,24 @@ func (g *GameState) StepGame() {
 			if g.Fighters[0].Speed.Value == g.Fighters[1].Speed.Value {
 				rand := rand.Float32() // Choose randomly on second tie
 				if rand < 0.5 {        // Left fighter acts
-					g.Act(&g.Fighters[0], &g.Fighters[1])
+					return LEFTTORIGHT
 				} else { // Right fighter acts
-					g.Act(&g.Fighters[1], &g.Fighters[0])
+					return RIGHTTOLEFT
 				}
 			} else if g.Fighters[0].Speed.Value > g.Fighters[1].Speed.Value {
-				g.Act(&g.Fighters[0], &g.Fighters[1])
+				return LEFTTORIGHT
 			} else {
-				g.Act(&g.Fighters[1], &g.Fighters[0])
+				return RIGHTTOLEFT
 			}
 		} else if g.Fighters[0].AttackTimer.Value < g.Fighters[1].AttackTimer.Value {
-			g.Act(&g.Fighters[0], &g.Fighters[1])
+			return LEFTTORIGHT
 		} else { // g.Fighters[1].AttackTimer < g.Fighters[0].AttackTimer
-			g.Act(&g.Fighters[1], &g.Fighters[0])
+			return RIGHTTOLEFT
 		}
 	} else if lReady {
-		g.Act(&g.Fighters[0], &g.Fighters[1])
+		return LEFTTORIGHT
 	} else if rReady {
-		g.Act(&g.Fighters[1], &g.Fighters[0])
+		return RIGHTTOLEFT
 	}
-}
-
-func (g *GameState) determineActingOrder() {
-
+	return NOT_READY // Reduntant return
 }

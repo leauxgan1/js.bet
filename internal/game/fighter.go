@@ -56,6 +56,7 @@ type Fighter struct {
 	Damage      IntStat   // Represents how consistently useful the framework/library is for common tasks
 	Speed       IntStat   // Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner
 	Accuracy    FloatStat // Represents how simple the library/frame work is / how easy it is to get it right at first (opposite of footguns), causes less misses
+	Dodge       FloatStat // Represents how quickly the framework can adapt and rebound after a failure
 	CritRate    FloatStat // Represents how suprisingly useful or versatile the framework/library is in niche situations
 	AttackTimer IntStat   // Time before next action of fighter, reduced by speed each turn
 	FighterAnim string    // Current Animation playing for fighter
@@ -101,6 +102,7 @@ var fighterList = [...]Fighter{
 		Speed:       NewIntStat(8),
 		AttackTimer: NewIntStat(20),
 		Accuracy:    NewFloatStat(0.5),
+		Dodge:       NewFloatStat(0.1),
 		CritRate:    NewFloatStat(0.0),
 		Abilities: []Ability{
 			{
@@ -123,6 +125,7 @@ var fighterList = [...]Fighter{
 		Speed:       NewIntStat(4),
 		AttackTimer: NewIntStat(20),
 		Accuracy:    NewFloatStat(0.6),
+		Dodge:       NewFloatStat(0.1),
 		CritRate:    NewFloatStat(0.2),
 		Abilities: []Ability{
 			{
@@ -160,6 +163,7 @@ var fighterList = [...]Fighter{
 		Speed:       NewIntStat(6),
 		AttackTimer: NewIntStat(20),
 		Accuracy:    NewFloatStat(0.8),
+		Dodge:       NewFloatStat(0.1),
 		CritRate:    NewFloatStat(0.3),
 		Abilities: []Ability{
 			{
@@ -182,6 +186,7 @@ var fighterList = [...]Fighter{
 		Speed:       NewIntStat(7),
 		AttackTimer: NewIntStat(20),
 		Accuracy:    NewFloatStat(0.8),
+		Dodge:       NewFloatStat(0.1),
 		CritRate:    NewFloatStat(0.4),
 		Abilities: []Ability{
 			{
@@ -204,6 +209,7 @@ var fighterList = [...]Fighter{
 		Speed:       NewIntStat(7),
 		AttackTimer: NewIntStat(20),
 		Accuracy:    NewFloatStat(0.8),
+		Dodge:       NewFloatStat(0.1),
 		CritRate:    NewFloatStat(0.3),
 		Abilities: []Ability{
 			{
@@ -226,6 +232,7 @@ var fighterList = [...]Fighter{
 		Speed:       NewIntStat(8),
 		AttackTimer: NewIntStat(20),
 		Accuracy:    NewFloatStat(0.99),
+		Dodge:       NewFloatStat(0.1),
 		CritRate:    NewFloatStat(0.4),
 		Abilities: []Ability{
 			{
@@ -256,6 +263,7 @@ var fighterList = [...]Fighter{
 		Speed:       NewIntStat(9),
 		AttackTimer: NewIntStat(20),
 		Accuracy:    NewFloatStat(0.99),
+		Dodge:       NewFloatStat(0.1),
 		CritRate:    NewFloatStat(0.4),
 		Abilities: []Ability{
 			{
