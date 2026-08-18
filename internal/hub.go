@@ -1,18 +1,22 @@
 package internal
 
+var userClientMap map[string]chan []byte = make(map[string]chan []byte, 10)
+
 type Hub struct {
-	broadcast  chan []byte
-	register   chan chan []byte
-	unregister chan chan []byte
-	clients    map[chan []byte]struct{}
+	broadcast  chan []byte // Messages of HTML that are sent out to any user showing the global state
+	register   chan Client
+	unregister chan Client
+	clients    map[Client]struct{}
 }
+
+type Client chan []byte
 
 func NewHub() *Hub {
 	return &Hub{
 		broadcast:  make(chan []byte),
-		register:   make(chan chan []byte),
-		unregister: make(chan chan []byte),
-		clients:    make(map[chan []byte]struct{}),
+		register:   make(chan Client),
+		unregister: make(chan Client),
+		clients:    make(map[Client]struct{}),
 	}
 }
 

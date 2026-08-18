@@ -82,15 +82,31 @@ func (db *DBClient) ChangeUserGold(name string, difference int) error {
 	return nil
 }
 
-func (db *DBClient) CheckAddUser(name string) (int64, error) {
+func (db *DBClient) CheckAddUser(name string, pass string) (int64, error) {
+	selectStatement := `
+		SELECT id FROM Users WHERE name == ? AND pass == ?;
+	`
+	foundUser := db.conn.QueryRow(selectStatement, name, pass)
+	var foundId int64
+	err := foundUser.Scan(&foundId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("User attempted to login but was not found, resorting to create the user")
+		} else {
+			return foundId, nil
+		}
+	} else {
+		return foundId, nil
+	}
+
 	insertStatement := `
 		INSERT INTO Users (name, pass, gold) VALUES (?, ?, ?);
 	`
-	result, err := db.conn.Exec(insertStatement, name, DEFAULT_PASS, DefaultGold)
+	insertedUser, err := db.conn.Exec(insertStatement, name, pass, DefaultGold)
 	if err != nil {
 		return 0, err
 	}
-	id, err := result.LastInsertId()
+	id, err := insertedUser.LastInsertId()
 	if err != nil {
 		return 0, err
 	}

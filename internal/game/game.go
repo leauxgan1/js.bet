@@ -5,7 +5,7 @@ import (
 	"js-bet/internal/eventlog"
 	"log"
 	"math/rand/v2"
-	"slices"
+	// "slices"
 )
 
 // Statistical Consts
@@ -21,10 +21,14 @@ type GameState struct {
 	Status       string
 }
 
+type UserState struct {
+	Gold int
+}
+
 func New() GameState {
 
 	fighters := [2]Fighter{}
-	fighters[0] = chooseRandomFighter()
+	fighters[0] = chooseReact()
 	rightFighter, err := chooseRandomFighterExclusive(fighters[0].Name)
 	if err != nil {
 		log.Panic(err)
@@ -210,12 +214,13 @@ func (g *GameState) StepGame() {
 	// For each fighter...
 	for fIdx := 0; fIdx < 2; fIdx += 1 {
 		// Update all effect durations on each fighter
+		log.Printf("%d -> %v", fIdx, g.Fighters[fIdx].Effects)
 		for i, effect := range g.Fighters[fIdx].Effects {
 			// Reduce effect duration if > 0
 			if effect.GetDuration() > 0 {
 				effect.StepDuration()
 			} else {
-				g.Fighters[fIdx].Effects = slices.Delete(g.Fighters[fIdx].Effects, i, i+1)
+				g.Fighters[fIdx].Effects = append(g.Fighters[fIdx].Effects[:i], g.Fighters[fIdx].Effects[i+1:]...)
 			}
 			// Apply tick function on each fighter
 			effect.OnTick(&g.Fighters[0])

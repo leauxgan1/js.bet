@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-// Need a section for Fight status (Pre fight, in progress, result + bet rewards)
-
 templ FighterSides(gameState game.GameState, assets assets.Assets) {
 	@FightHeader(gameState)
 	<div id="fighter-sides" data-audios={gameState.AudioPlayers.FormatAudioPlayer()} style={fmt.Sprintf("--left-gradient-color: %s;--right-gradient-color:%s;", gameState.Fighters[0].Color, gameState.Fighters[1].Color)}>
@@ -59,6 +57,53 @@ templ FighterStats(f game.Fighter) {
 	</div>
 }
 
+
+templ EventLog(f eventlog.FighterEventLog) {
+	<ul id="eventlog">
+		for i, item := range f.Log {
+			<li id={fmt.Sprintf("event-%d",i)}>
+				{i}: {item}
+			</li>
+		}
+	</ul>
+}
+
+templ ProgressBar(curr int, max int) {
+	{{
+		var diff int = max - curr
+	}}
+	<ul id="">
+		for _ = range curr {
+			<li></li>
+		}
+		for _ = range diff {
+			<li></li>
+		}
+	</ul>
+}
+
+templ PopupLogin() {
+	<div id="popup">
+		<button hx-on:click="this.parentElement.setAttribute('hidden',true)">X</button>
+		<h1> Sign up / Log in to JS.bet </h1>
+		<form action="/user/login" method="post">
+			<input type="text" name="name">
+			<input type="text" name="pass">
+			<button type="submit" hx-post="/user/login">Submit </button>
+		</form>
+	</div>
+}
+
+templ Popup(info string) {
+	<div>
+		<p> {info} </p>
+		<button> Close </button>
+	</div>
+}
+templ PopupHidden() {
+	<div id="popup" hidden></div>
+}
+
 templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 	{{
 		var iconID string
@@ -76,65 +121,10 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 			iconID = "right-fighter-icon"
 			dir = "-right"
 		}
-		animationName = "animate-" + fighter.FighterAnim + dir 
+		animationName = "animate-" + fighter.FighterAnim + dir
 	}}
+
 		<div id={iconID} class={fmt.Sprintf("%s %s", animationName, woundedAnim)}>
 			@templ.Raw(assets.IconsSvgs[fighter.Name])
 		</div>
-}
-
-templ EventLog(f eventlog.FighterEventLog) {
-	<ul id="eventlog">
-		for i, item := range f.Log {
-			<li id={fmt.Sprintf("event-%d",i)}>
-				{i}: {item}
-			</li>
-		}
-	</ul>
-}
-
-templ Popup(info string) {
-	<div>
-		<p> {info} </p>
-		<button> Close </button>
-	</div>
-}
-
-templ ProgressBar(curr int, max int) {
-	{{
-		var diff int = max - curr
-	}}
-	<ul id="">
-		for _ = range curr {
-			<li></li>
-		}
-		for _ = range diff {
-			<li></li>
-		}
-	</ul>
-}
-
-templ PopupSignup() {
-	<div id="popup">
-		<h1> Sign up for JS.bet </h1>
-		<form>
-			<input type="text" name="username">
-			<input type="text" name="password">
-			<button type="button" data-on-click="@post('/user/signup','{contentType:'form'}')"></button>
-		</form>
-	</div>
-}
-templ PopupLogin() {
-	<div id="popup">
-		<h1> Log in to JS.bet </h1>
-		<form>
-			<input type="text" name="username">
-			<input type="text" name="password">
-			<button type="button" data-on-click="@post('/user/signup','{contentType:'form'}')"></button>
-		</form>
-	</div>
-}
-
-templ PopupHidden() {
-	<div id="popup" hidden ></div>
 }

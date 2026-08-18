@@ -7,7 +7,6 @@ import (
 	"context"
 	"strconv"
 
-	// "encoding/json"
 	"fmt"
 	"js-bet/internal/assets"
 	"js-bet/internal/components"
@@ -21,21 +20,20 @@ import (
 	"time"
 
 	"github.com/andybalholm/brotli"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
 	PORT = 8080
 )
 
-var frameCount int
 var homepage []byte
-var currentGame game.GameState
 var siteAssets assets.Assets
 var db DBClient
-var basePath string
 var staticPath string
-
 var sseHub *Hub
+
+const SECRET = "I am a secret key"
 
 func StartServer() {
 	// Get access to the filesystem
@@ -50,12 +48,12 @@ func StartServer() {
 	// Create new server Handler
 	mux := http.NewServeMux()
 	mux.Handle("/", fileServer)
-	mux.HandleFunc("/game/", handleGame)
-	mux.HandleFunc("/user/signup", handleSignupRequest)
-	mux.HandleFunc("/user/new", handleNewUserRequest)
+	mux.Handle("/game/", authMiddlewarePermissive(http.HandlerFunc(handleGame)))
+	mux.HandleFunc("/user/promptLogin", handlePromptLoginRequest)
+	// mux.HandleFunc("/user/new", handleNewUserRequest)
 	mux.HandleFunc("/user/login", handleLoginRequest)
-	mux.HandleFunc("/user/gold", handleGetUserInfo)
-	mux.HandleFunc("/placeBet", handlePlaceBet)
+	// mux.HandleFunc("/user/gold", handleGetUserInfo)
+	mux.Handle("/user/placeBet", authMiddlewareStrict(http.HandlerFunc(handlePlaceBet)))
 
 	// Setup event log for server
 	eventlog.EventLog = eventlog.New()
@@ -79,10 +77,11 @@ func StartServer() {
 
 	log.Printf("Starting server on https://localhost:%d\n", PORT)
 
-	currentGame = game.New()
+	currentGame := game.New()
 
 	sseHub = NewHub()
 	go sseHub.Run()
+
 	// Start first game and run until server closes
 	go runGame(currentGame, sseHub)
 
@@ -92,7 +91,7 @@ func StartServer() {
 }
 
 func runGame(gs game.GameState, hub *Hub) {
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(time.Millisecond * 1000)
 	defer ticker.Stop()
 
 	var buffer bytes.Buffer
@@ -104,6 +103,9 @@ func runGame(gs game.GameState, hub *Hub) {
 		buffer.Reset()
 
 		gs.StepGame()
+		if gs.Winner != game.NEITHER {
+			AwardBets(gs.Winner)
+		}
 
 		if len(sseHub.clients) > 0 {
 			// Render new gamestate into html for all clients
@@ -122,13 +124,12 @@ func runGame(gs game.GameState, hub *Hub) {
 			hub.broadcast <- buffer.Bytes()
 			// log.Printf("RENDERED")
 		}
-
 	}
 }
 
 /*
-Connects user to SSE connection to get game updates
-Attempts to serve the html with different forms of compression depending on the accepted content encodings of the client
+	Connects user to SSE connection to get game updates
+	Attempts to serve the html with different forms of compression depending on the accepted content encodings of the client
 */
 
 func handleGame(w http.ResponseWriter, r *http.Request) {
@@ -136,13 +137,13 @@ func handleGame(w http.ResponseWriter, r *http.Request) {
 		log.Panic("Incorrect method for endpoint '/game/', expected POST")
 		return
 	}
+
 	rc := http.NewResponseController(w)
 	rc.SetWriteDeadline(time.Time{})
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Play-Audio", "attack,block")
 
 	encodings := r.Header.Get("Accept-Encoding")
 	var brotliWriter *brotli.Writer = nil
@@ -170,6 +171,13 @@ func handleGame(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		http.Error(w, "Streaming not supported", http.StatusInternalServerError)
 		return
+	}
+	userId, foundUser := r.Context().Value("UserId").(string)
+	log.Printf("Userid found: %s", userId)
+	if foundUser {
+		// Populate userID in user->client map
+		userClientMap[userId] = client
+		defer func() { delete(userClientMap, userId) }()
 	}
 
 	for {
@@ -204,21 +212,52 @@ func handleGame(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 }
 
 func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		log.Panic("Incorrect method for endpoint 'user/signup', expected POST")
+		log.Panic("Incorrect method for endpoint 'user/login', expected POST")
 		return
 	}
-	params := r.URL.Query()
-	userName := params.Get("name")
+	r.ParseForm()
+	userName := r.FormValue("name")
+	passWord := r.FormValue("pass")
 	w.Header().Set("Content-Type", "text/html")
-	_, err := db.CheckAddUser(userName)
+
+	userId, err := db.CheckAddUser(userName, passWord)
 	if err != nil {
-		log.Panic(err)
+		_, err := fmt.Fprint(w, "<div> Unable to add or find user in the database</div>")
+		if err != nil {
+			log.Panic(err)
+		}
 		return
 	}
+
+	claims := UserClaims{
+		UserID:   userId,
+		Password: passWord,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			Issuer:    "js.bet",
+			Subject:   fmt.Sprintf("%d", userId),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signed, err := token.SignedString(SECRET)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt_token",
+		Value:    signed,
+		HttpOnly: true,  // Prevents JavaScript access (XSS protection)
+		Secure:   false, // Set to true in production with HTTPS
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+		MaxAge:   86400, // 24 hours in seconds
+	})
+	http.Redirect(w, r, "/", http.StatusFound)
+
 	_, err = fmt.Fprintf(w, "<div>Received user with name: %s, added to db!</div>", userName)
 	if err != nil {
 		log.Panic(err)
@@ -226,68 +265,71 @@ func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleNewUserRequest(w http.ResponseWriter, r *http.Request) {
-	// On a POST request, accept a username an password as params, santitize them, and if unique, add them as a new user to the database
-	if r.Method != http.MethodPost {
-		log.Panic("Incorrect method for endpoint 'user/signup', expected POST")
-		return
-	}
-	params := r.URL.Query()
-	userName := params.Get("name")
-	w.Header().Set("Content-Type", "text/html")
-	_, err := db.CheckAddUser(userName)
-	if err != nil {
-		log.Panic(err)
-		return
-	}
-	_, err = fmt.Fprintf(w, "<div>Received user with name: %s, added to db!</div>", userName)
-	if err != nil {
-		log.Panic(err)
-		return
-	}
-}
+// func handleNewUserRequest(w http.ResponseWriter, r *http.Request) {
+// 	// On a POST request, accept a username an password as params, santitize them, and if unique, add them as a new user to the database
+// 	if r.Method != http.MethodPost {
+// 		log.Panic("Incorrect method for endpoint 'user/new', expected POST")
+// 		return
+// 	}
+// 	params := r.URL.Query()
+// 	userName := params.Get("name")
+// 	passWord := params.Get("pass")
+// 	w.Header().Set("Content-Type", "text/html")
 
-func handleSignupRequest(w http.ResponseWriter, r *http.Request) {
+// 	// Attempt to add user with provided username
+// 	ret, err := db.CheckAddUser(userName, passWord)
+// 	if err != nil {
+// 		log.Panic(err)
+// 		return
+// 	}
+// 	// Return response based on success of database insertion
+// 	if ret == 0 {
+// 		_, err = fmt.Fprintf(w, "<div> Unable to add user to database, err: %s </div>", err)
+// 	} else {
+// 		_, err = fmt.Fprintf(w, "<div>Received user with name: %s, added to db!</div>", userName)
+// 		if err != nil {
+// 			log.Panic(err)
+// 			return
+// 		}
+// 	}
+// }
+
+func handlePromptLoginRequest(w http.ResponseWriter, r *http.Request) {
 	// On a GET request, send a signup popup gui to the user
 	if r.Method != http.MethodGet {
-		log.Panic("Incorrect method for endpoint 'user/signup', expected GET")
+		log.Panic("Incorrect method for endpoint 'user/promptLogin', expected GET")
 		return
 	}
 
-	signup := components.PopupSignup()
+	w.Header().Set("Content-Type", "text/html")
+	signup := components.PopupLogin()
 	err := signup.Render(context.Background(), w)
-
 	if err != nil {
 		log.Panic(err)
 		return
 	}
 }
 
-func handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
-	params := r.URL.Query()
-	name := params.Get("name")
-	w.Header().Set("Content-Type", "text/html")
-	gold, err := db.GetUserGold(name)
+// func handleGetUserInfo(w http.ResponseWriter, r *http.Request) {
+// 	params := r.URL.Query()
+// 	name := params.Get("name")
+// 	w.Header().Set("Content-Type", "text/html")
+// 	gold, err := db.GetUserGold(name)
 
-	if err != nil {
-		_, err = fmt.Fprintf(w, "<div>Got name: %s</div> <div> Gold data unavailable... </div>", name)
-		if err != nil {
-			log.Panic(err)
-			return
-		}
-	} else {
-		_, err = fmt.Fprintf(w, "<div>Got name: %s</div> <div> Has %d gold... </div>", name, gold)
-		if err != nil {
-			log.Panic(err)
-			return
-		}
-	}
-}
-
-type betShape struct {
-	BetSide   string `json:"betside"`
-	BetAmount int    `json:"betamount"`
-}
+// 	if err != nil {
+// 		_, err = fmt.Fprintf(w, "<div>Got name: %s</div> <div> Gold data unavailable... </div>", name)
+// 		if err != nil {
+// 			log.Panic(err)
+// 			return
+// 		}
+// 	} else {
+// 		_, err = fmt.Fprintf(w, "<div>Got name: %s</div> <div> Has %d gold... </div>", name, gold)
+// 		if err != nil {
+// 			log.Panic(err)
+// 			return
+// 		}
+// 	}
+// }
 
 func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 	// Show a popup temporarily to confirm the user has bet some amount
@@ -298,12 +340,24 @@ func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 	if r.Form == nil {
 		log.Panic("Unable to parse form")
 	}
+	betSide := r.FormValue("betside")
+
+	var isLeft bool
+	switch betSide {
+	case "left":
+		isLeft = true
+	case "right":
+		isLeft = false
+	default:
+		log.Print("Bet side not found")
+		return
+	}
+
 	betAmount, err := strconv.Atoi(r.FormValue("betamount"))
 	if err != nil {
-		log.Panic("Unable to determine bet amount from form values")
+		log.Print("Unable to determine bet amount from form values")
 	}
-	game.SetBet("TempUsername", betAmount)
-
-	fmt.Fprintf(w, "Place bet amount for $%d", betAmount)
+	SetBet("TempUsername", betAmount, isLeft)
+	fmt.Fprintf(w, "Placed bet amount for $%d", betAmount)
 
 }
