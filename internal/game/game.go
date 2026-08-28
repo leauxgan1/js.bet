@@ -22,11 +22,11 @@ type GameState struct {
 }
 
 type UserState struct {
-	Gold int
+	UserName string
+	Gold     int
 }
 
 func New() GameState {
-
 	fighters := [2]Fighter{}
 	fighters[0] = chooseReact()
 	rightFighter, err := chooseRandomFighterExclusive(fighters[0].Name)

@@ -4,7 +4,12 @@ import (
 	"js-bet/internal/game"
 )
 
-// OOB swap of gold amount on homepage
-templ Gold(userState game.UserState) {
-  <div> </div>  
+// Show user their name and gold amount, updated when they win or lose a bet
+templ Profile(userState game.UserState) {
+	<hx-partial hx-target="#player-info" hx-swap="outerMorph">
+	  <div id="player-info">
+			<h1> {userState.UserName} </h1>
+			<p> {userState.Gold} </p>
+		</div>  
+	</hx-partial>
 }

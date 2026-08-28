@@ -1,6 +1,6 @@
 package internal
 
-var userClientMap map[string]chan []byte = make(map[string]chan []byte, 10)
+var userClientMap map[int64]chan []byte = make(map[int64]chan []byte, 10)
 
 type Hub struct {
 	broadcast  chan []byte // Messages of HTML that are sent out to any user showing the global state

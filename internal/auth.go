@@ -3,11 +3,12 @@ package internal
 import (
 	"context"
 	"github.com/golang-jwt/jwt/v5"
+	"log"
 	"net/http"
-	"strings"
+	// "strings"
 )
 
-const userIDKey string = "userID"
+const userIDKey string = "userId"
 
 type UserClaims struct {
 	UserID   int64  `json:"user"`
@@ -18,16 +19,28 @@ type UserClaims struct {
 // Passes on userID
 func authMiddlewarePermissive(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Checking for JWT in header
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			next.ServeHTTP(w, r) // Pass along to next handler
-			// http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
+		var tokenStr string
+		cookie, err := r.Cookie("jwt_token")
+		if err == nil && cookie.Value != "" {
+			tokenStr = cookie.Value
+			log.Printf("jwt cookie found: %s\n", cookie)
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (any, error) {
+		if tokenStr == "" {
+			authHeader := r.Header.Get("Authorization")
+			if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+				tokenStr = authHeader[7:]
+			}
+		}
+
+		if tokenStr == "" {
+			log.Printf("Could not find auth header 'Authorization'")
+			next.ServeHTTP(w, r)
+			return
+
+		}
+
+		token, err := jwt.ParseWithClaims(tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
 			return []byte(SECRET), nil
 		})
 
@@ -52,25 +65,44 @@ func authMiddlewarePermissive(next http.Handler) http.Handler {
 // Passes userid and fails when not authorized
 func authMiddlewareStrict(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Checking for JWT in header
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
+		log.Printf("Starting auth")
+		var tokenStr string
+		cookie, err := r.Cookie("jwt_token")
+		if err != nil {
+			log.Printf("Error retrieving cookie: %v", err)
+		} else {
+			if cookie.Value != "" {
+				tokenStr = cookie.Value
+				log.Printf("jwt cookie found: %s\n", cookie.Value)
+			}
+		}
+
+		if tokenStr == "" {
+			authHeader := r.Header.Get("Authorization")
+			if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+				tokenStr = authHeader[7:]
+			}
+		}
+
+		if tokenStr == "" {
+			log.Printf("Could not find auth header 'Authorization'")
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (any, error) {
+		token, err := jwt.ParseWithClaims(tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
 			return []byte(SECRET), nil
 		})
 
 		if err != nil || !token.Valid {
+			log.Printf("Error or invalid token when parsing token string")
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
 		claims, ok := token.Claims.(*UserClaims)
 		if !ok {
+			log.Printf("Invalid claims")
 			http.Error(w, "Invalid claims", http.StatusUnauthorized)
 			return
 		}

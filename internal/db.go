@@ -62,9 +62,9 @@ func (db *DBClient) GetUserGold(name string) (int, error) {
 	return gold, nil
 }
 
-func (db *DBClient) ChangeUserGold(name string, difference int) error {
+func (db *DBClient) ChangeUserGold(userId int64, difference int) error {
 	updateStatement := `
-			UPDATE Users SET gold = gold + ? WHERE name = ?;
+			UPDATE Users SET gold = gold + ? WHERE id = ?;
 	`
 	transaction, err := db.conn.Begin()
 	defer db.conn.Close()
@@ -75,7 +75,7 @@ func (db *DBClient) ChangeUserGold(name string, difference int) error {
 	if err != nil {
 		return err
 	}
-	_, err = statement.Exec(difference, name)
+	_, err = statement.Exec(difference, userId)
 	if err != nil {
 		return err
 	}

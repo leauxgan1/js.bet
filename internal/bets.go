@@ -2,7 +2,7 @@ package internal
 
 import (
 	"js-bet/internal/game"
-	"log"
+	// "log"
 )
 
 type BetDetails struct {
@@ -10,17 +10,17 @@ type BetDetails struct {
 	BetSide   bool // (true, false) => (Left, Right)
 }
 
-var Bets map[string]BetDetails = make(map[string]BetDetails, 10)
+var Bets map[int64]BetDetails = make(map[int64]BetDetails, 10)
 
-func SetBet(name string, amount int, side bool) {
-	Bets[name] = BetDetails{amount, side}
-	var sideStr string
-	if side {
-		sideStr = "Left"
-	} else {
-		sideStr = "Right"
-	}
-	log.Printf("%s Bet on %s with an amount of %d", name, sideStr, amount)
+func SetBet(userId int64, amount int, side bool) {
+	Bets[userId] = BetDetails{amount, side}
+	// var sideStr string
+	// if side {
+	// 	sideStr = "Left"
+	// } else {
+	// 	sideStr = "Right"
+	// }
+	// log.Printf("User with ID: %d Bet on %s with an amount of %d", userId, sideStr, amount)
 }
 
 func ClearBets() {
@@ -29,22 +29,28 @@ func ClearBets() {
 	}
 }
 
-func AwardBet(name string, winnerResult game.WinnerEnum) {
-	details := Bets[name]
-	if details.BetSide == true && winnerResult == game.LEFT {
+func awardBet(client Client, userId int64, details BetDetails, winnerResult game.WinnerEnum) {
+	if details.BetSide == true && winnerResult == game.LEFT || details.BetSide == false && winnerResult == game.RIGHT {
 		// Award money to this player
-	} else if details.BetSide == false && winnerResult == game.RIGHT {
-		// Award money
+		db.ChangeUserGold(userId, 2*details.BetAmount)
+	} else {
+		db.ChangeUserGold(userId, -details.BetAmount)
 	}
-	// Give nothing
+	updateGoldGUI(client) // Send an update to that client since their gold amount definitely changed
+}
+
+func updateGoldGUI(client Client) {
+
 }
 
 func AwardBets(winner game.WinnerEnum) {
-	log.Print(sseHub.clients)
+	// log.Print(sseHub.clients)
+
 	// For each name in our map of Bets, award that user with double the amount they put in if they succeeded.
 	// Otherwise, reduce their gold by the amount they bet
-	// for key, val := range Bets {
-
-	// }
-	// Then, for each client currently connected, send them an html update of their client state
+	for userId, betDetails := range Bets {
+		client := userClientMap[userId]
+		awardBet(client, userId, betDetails, winner)
+	}
+	// Send out new HTML fragment for each user connected with a matching ID
 }

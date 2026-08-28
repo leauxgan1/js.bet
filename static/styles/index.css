@@ -168,3 +168,26 @@ nav {
     }
   }
 }
+
+#player-info {
+  border: var(--border-size-3) solid var(--tertiary);
+  border-radius: var(--radius-2);
+  background: var(--primary);
+  z-index: 10;
+
+  /* img { */
+  /* border: var(--border-size-3) solid var(--secondary); */
+  /* border-radius: var(--radius-2); */
+  /* } */
+
+  h1 {
+    /* Username display */
+    color: blue;
+  }
+
+  p {
+    /* Gold display */
+    color: gold;
+  }
+
+}
