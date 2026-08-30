@@ -21,9 +21,13 @@ func authMiddlewarePermissive(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var tokenStr string
 		cookie, err := r.Cookie("jwt_token")
-		if err == nil && cookie.Value != "" {
-			tokenStr = cookie.Value
-			log.Printf("jwt cookie found: %s\n", cookie)
+		if err != nil {
+			log.Printf("Error retrieving cookie: %v", err)
+		} else {
+			if cookie.Value != "" {
+				tokenStr = cookie.Value
+				log.Printf("jwt cookie found: %s\n", cookie.Value)
+			}
 		}
 
 		if tokenStr == "" {
@@ -36,23 +40,24 @@ func authMiddlewarePermissive(next http.Handler) http.Handler {
 		if tokenStr == "" {
 			log.Printf("Could not find auth header 'Authorization'")
 			next.ServeHTTP(w, r)
+			// http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
-
 		}
 
 		token, err := jwt.ParseWithClaims(tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
-			return []byte(SECRET), nil
+			return []byte(jwt_secret), nil
 		})
 
 		if err != nil || !token.Valid {
-			next.ServeHTTP(w, r) // Pass along to next handler
-			// http.Error(w, "Invalid token", http.StatusUnauthorized)
+			log.Printf("Error or invalid token when parsing token string")
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
 		claims, ok := token.Claims.(*UserClaims)
 		if !ok {
-			next.ServeHTTP(w, r) // Pass along to next handler
+			log.Printf("Invalid claims")
+			next.ServeHTTP(w, r)
 			// http.Error(w, "Invalid claims", http.StatusUnauthorized)
 			return
 		}
@@ -65,7 +70,6 @@ func authMiddlewarePermissive(next http.Handler) http.Handler {
 // Passes userid and fails when not authorized
 func authMiddlewareStrict(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Starting auth")
 		var tokenStr string
 		cookie, err := r.Cookie("jwt_token")
 		if err != nil {
@@ -91,7 +95,7 @@ func authMiddlewareStrict(next http.Handler) http.Handler {
 		}
 
 		token, err := jwt.ParseWithClaims(tokenStr, &UserClaims{}, func(token *jwt.Token) (any, error) {
-			return []byte(SECRET), nil
+			return []byte(jwt_secret), nil
 		})
 
 		if err != nil || !token.Valid {

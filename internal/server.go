@@ -7,6 +7,7 @@ import (
 	"context"
 	"strconv"
 
+	"crypto/rand"
 	"fmt"
 	"js-bet/internal/assets"
 	"js-bet/internal/components"
@@ -22,6 +23,7 @@ import (
 	// "github.com/a-h/templ"
 	"github.com/andybalholm/brotli"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -34,7 +36,7 @@ var db DBClient
 var staticPath string
 var sseHub *Hub
 
-const SECRET = "I am a secret key"
+var jwt_secret []byte = make([]byte, 8)
 
 func StartServer() {
 	// Get access to the filesystem
@@ -46,10 +48,27 @@ func StartServer() {
 	staticPath = filepath.Join(projectRoot, "static")
 	fileServer := http.FileServer(http.Dir(staticPath))
 
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("Error loading .env file: %s", err)
+	}
+	secret_key, secret_found := os.LookupEnv("SECRET_KEY")
+	if secret_found {
+		jwt_secret = []byte(secret_key)
+	} else {
+		log.Print(">SECRET_KEY env var not found, falling back to creating random authentication secret key")
+		log.Print(">Randomness can be manipulated, stay safe")
+		_, err = rand.Read([]byte(jwt_secret))
+		if err != nil {
+			log.Panicf("Random authentication key failed to initialize, aborting: %s", err)
+			return
+		}
+		log.Printf("%s", jwt_secret)
+	}
+
 	// Create new server Handler
 	mux := http.NewServeMux()
 	mux.Handle("/", fileServer)
-	mux.Handle("/game/", authMiddlewareStrict(http.HandlerFunc(handleGame)))
+	mux.Handle("/game/", authMiddlewarePermissive(http.HandlerFunc(handleGame)))
 	mux.HandleFunc("/user/promptLogin", handlePromptLoginRequest)
 	mux.HandleFunc("/user/login", handleLoginRequest)
 	mux.Handle("/user/placeBet", authMiddlewareStrict(http.HandlerFunc(handlePlaceBet)))
@@ -188,17 +207,7 @@ func handleGame(w http.ResponseWriter, r *http.Request) {
 			UserName: "Default Username",
 			Gold:     DefaultGold,
 		}
-		var buffer bytes.Buffer
-		buffer.Grow(300)
-		bufWriter := bufio.NewWriter(&buffer)
-		fragment := components.Profile(userState)
-		err := fragment.Render(context.Background(), bufWriter)
-		if err != nil {
-			log.Printf("Error rendering user UI: %s", err)
-		}
-		bufWriter.Flush()
-		userUI := buffer.Bytes()
-		log.Printf("Sending this html to this specific client %s", string(userUI))
+		userUI := renderUserProfile(userState)
 		// Send directly via SSE
 		if brotliWriter != nil {
 			WriteSSE(brotliWriter, userUI)
@@ -220,21 +229,21 @@ func handleGame(w http.ResponseWriter, r *http.Request) {
 			}
 			var writeErr error
 			if brotliWriter != nil {
-				log.Printf("Compressing with brotli\n")
+				// log.Printf("Compressing with brotli\n")
 				writeErr = WriteSSE(brotliWriter, html)
 				err := brotliWriter.Flush()
 				if err != nil {
 					fmt.Printf("error flushing writer %v", err)
 				}
 			} else if gzipWriter != nil {
-				log.Printf("Compressing with gzip\n")
+				// log.Printf("Compressing with gzip\n")
 				writeErr = WriteSSE(gzipWriter, html)
 				err := gzipWriter.Flush()
 				if err != nil {
 					fmt.Printf("error flushing writer %v", err)
 				}
 			} else {
-				log.Printf("Sending uncompressed html \n")
+				// log.Printf("Sending uncompressed html \n")
 				writeErr = WriteSSE(w, html)
 			}
 			if writeErr != nil {
@@ -283,7 +292,7 @@ func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signed, err := token.SignedString([]byte(SECRET))
+	signed, err := token.SignedString(jwt_secret)
 	if err != nil {
 		log.Printf("Error signing string: %s", err)
 	}
@@ -337,12 +346,14 @@ func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 	userId, foundUser := r.Context().Value("userId").(int64)
 	log.Printf("Userid found: %d", userId)
 	if !foundUser {
+		http.Error(w, "Unable to find user to place bet for", http.StatusForbidden)
 		return
 	}
 
 	r.ParseForm()
 	if r.Form == nil {
 		log.Panic("Unable to parse form")
+		http.Error(w, "Unable to find user to place bet for", http.StatusBadRequest)
 		return
 	}
 	betSide := r.FormValue("betside")
@@ -361,6 +372,8 @@ func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 	betAmount, err := strconv.Atoi(r.FormValue("betamount"))
 	if err != nil {
 		log.Print("Unable to determine bet amount from form values")
+		http.Error(w, "Unable to determine bet amount from form values", http.StatusBadRequest)
+		return
 	}
 	SetBet(userId, betAmount, isLeft)
 	fmt.Fprintf(w, "Placed bet amount for $%d", betAmount)

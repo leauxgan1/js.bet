@@ -8,6 +8,9 @@ import (
 	// "slices"
 )
 
+const PRE_ROUND_TIME = 5
+const POST_ROUND_TIME = 7
+
 // Statistical Consts
 const CRIT_MULTIPLIER = 2.0
 
@@ -28,7 +31,7 @@ type UserState struct {
 
 func New() GameState {
 	fighters := [2]Fighter{}
-	fighters[0] = chooseReact()
+	fighters[0] = chooseSvelte()
 	rightFighter, err := chooseRandomFighterExclusive(fighters[0].Name)
 	if err != nil {
 		log.Panic(err)
@@ -38,7 +41,7 @@ func New() GameState {
 		Fighters:   fighters,
 		Winner:     NEITHER,
 		Phase:      PREROUND,
-		PhaseTimer: 10,
+		PhaseTimer: PRE_ROUND_TIME,
 	}
 }
 
@@ -177,7 +180,7 @@ func (g *GameState) StepGame() {
 		if g.PhaseTimer < 0 {
 			g.Phase = PREROUND
 			g.ResetKeepWinner()
-			g.PhaseTimer = 10
+			g.PhaseTimer = PRE_ROUND_TIME
 			g.Status = "Pre-Round Phase"
 			g.Winner = NEITHER
 		}
@@ -196,7 +199,7 @@ func (g *GameState) StepGame() {
 	if winner != NEITHER {
 		g.Winner = winner
 		g.Phase = POSTROUND
-		g.PhaseTimer = 10
+		g.PhaseTimer = POST_ROUND_TIME
 		var winnerName string
 		switch g.Winner {
 		case LEFT:

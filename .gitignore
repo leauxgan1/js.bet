@@ -5,3 +5,4 @@ node_modules/
 notes.md
 bin/
 todo.md
+.env

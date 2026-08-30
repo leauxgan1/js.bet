@@ -8,7 +8,7 @@ import (
 templ Profile(userState game.UserState) {
 	<hx-partial hx-target="#player-info" hx-swap="outerMorph">
 	  <div id="player-info">
-			<h1> {userState.UserName} </h1>
+			<h2> {userState.UserName} </h2>
 			<p> {userState.Gold} </p>
 		</div>  
 	</hx-partial>

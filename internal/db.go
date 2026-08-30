@@ -41,25 +41,41 @@ func (db *DBClient) InitDB() error {
 	return err
 }
 
-func (db *DBClient) GetUserGold(name string) (int, error) {
-	var gold int
+func (db *DBClient) GetUserGold(userId int64) (int, error) {
 	queryString := `
-		SELECT gold FROM Users WHERE name = ?;
+		SELECT gold FROM Users WHERE id = ?;
 	`
-	transaction, err := db.conn.Begin()
-	defer db.conn.Close()
+	rows := db.conn.QueryRow(queryString, userId)
+	var gold int
+	err := rows.Scan(&gold)
 	if err != nil {
-		return 0, err
+		if err == sql.ErrNoRows {
+			log.Printf("User attempted to login but was not found, resorting to create the user")
+			return 0, err
+		} else {
+			return gold, nil
+		}
+	} else {
+		return gold, nil
 	}
-	statement, err := transaction.Prepare(queryString)
+}
+func (db *DBClient) GetUserName(userId int64) (string, error) {
+	queryString := `
+		SELECT name FROM Users WHERE id = ?;
+	`
+	rows := db.conn.QueryRow(queryString, userId)
+	var userName string = ""
+	err := rows.Scan(&userName)
 	if err != nil {
-		return 0, err
+		if err == sql.ErrNoRows {
+			log.Printf("User attempted to login but was not found, resorting to create the user")
+			return "", err
+		} else {
+			return userName, nil
+		}
+	} else {
+		return userName, nil
 	}
-	err = statement.QueryRow(name).Scan(&gold)
-	if err != nil {
-		return 0, err
-	}
-	return gold, nil
 }
 
 func (db *DBClient) ChangeUserGold(userId int64, difference int) error {

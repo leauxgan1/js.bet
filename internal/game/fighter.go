@@ -285,8 +285,8 @@ func chooseRandomFighter() Fighter {
 	// log.Printf("Randomly chose %v\n", randomFighter)
 	return randomFighter
 }
-func chooseReact() Fighter {
-	return fighterList[1]
+func chooseSvelte() Fighter {
+	return fighterList[3]
 }
 
 func chooseRandomFighterExclusive(excludedFighterName string) (Fighter, error) {

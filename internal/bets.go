@@ -2,6 +2,7 @@ package internal
 
 import (
 	"js-bet/internal/game"
+	"log"
 	// "log"
 )
 
@@ -36,11 +37,26 @@ func awardBet(client Client, userId int64, details BetDetails, winnerResult game
 	} else {
 		db.ChangeUserGold(userId, -details.BetAmount)
 	}
-	updateGoldGUI(client) // Send an update to that client since their gold amount definitely changed
+	gold, err := db.GetUserGold(userId)
+	if err != nil {
+		log.Panicf("Error retrieving user gold: %s", err)
+	}
+	name, err := db.GetUserName(userId)
+	if err != nil {
+		log.Panicf("Error retrieving user name: %s", err)
+	}
+
+	userState := game.UserState{
+		UserName: name,
+		Gold:     gold,
+	}
+
+	updateGoldGUI(userState, client) // Send an update to that client since their gold amount definitely changed
 }
 
-func updateGoldGUI(client Client) {
-
+func updateGoldGUI(userState game.UserState, client Client) {
+	html := renderUserProfile(userState)
+	client <- html
 }
 
 func AwardBets(winner game.WinnerEnum) {
@@ -52,5 +68,4 @@ func AwardBets(winner game.WinnerEnum) {
 		client := userClientMap[userId]
 		awardBet(client, userId, betDetails, winner)
 	}
-	// Send out new HTML fragment for each user connected with a matching ID
 }

@@ -170,24 +170,29 @@ nav {
 }
 
 #player-info {
+  position: fixed;
+  padding: var(--size-4);
   border: var(--border-size-3) solid var(--tertiary);
   border-radius: var(--radius-2);
   background: var(--primary);
   z-index: 10;
+  left: 87.5%;
+  top: 12.5%;
+  width: 10%;
+  height: 12.5%;
 
-  /* img { */
-  /* border: var(--border-size-3) solid var(--secondary); */
-  /* border-radius: var(--radius-2); */
-  /* } */
-
-  h1 {
+  h2 {
     /* Username display */
-    color: blue;
+    color: var(--tertiary);
+    font-size: 0.75em;
+    text-align: center;
+    margin: 0;
   }
 
   p {
     /* Gold display */
     color: gold;
+    text-align: center;
   }
 
 }

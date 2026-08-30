@@ -46,7 +46,7 @@
 
 	<div id="left-bet" class="bet">
 		<h5>Bet on Left</h5>
-		<form action="/user/placeBet" method="post" data-hx-post="/placeBet" data-hx-swap="beforeend">
+		<form action="/user/placeBet" method="post" data-hx-post="/user/placeBet" data-hx-swap="beforeend">
 			<input hidden name="betside" value="left">
 			<input required name="betamount" placeholder="10" type="number">
 			<button>Place Bet</button>
@@ -54,7 +54,7 @@
 	</div>
 	<div id="right-bet" class="bet">
 		<h5>Bet on Right</h5>
-		<form action="/user/placeBet" method="post" data-hx-post="/placeBet" data-hx-swap="beforeend">
+		<form action="/user/placeBet" method="post" data-hx-post="/user/placeBet" data-hx-swap="beforeend">
 			<input hidden name="betside" value="right">
 			<input required name="betamount" placeholder="10" type="number">
 			<button>Place Bet</button>
