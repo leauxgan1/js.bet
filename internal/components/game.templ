@@ -35,18 +35,18 @@ templ FighterStats(f game.Fighter) {
 		</h2>
 		<div>
 			Health: 
-			// @ProgressBar(f.Health,f.MaxHealth)
-			{f.Health.Value} / {f.Health.MaxValue}
+			<br>
+			@ProgressBar(f.Health.Value,f.Health.MaxValue)
+		</div>
+		<div>
+			Attack Timer: 
+			<br>
+			@ProgressBar(f.AttackTimer.Value,f.AttackTimer.MaxValue)
 		</div>
 		<div>
 			Damage: { f.Damage.Value } </div>
 		<div>
 			Speed: { f.Speed.Value }
-		</div>
-		<div>
-			Timer: 
-			// @ProgressBar(f.Timer,game.DEFAULT_TIMER)
-			{f.AttackTimer.Value} / {f.AttackTimer.MaxValue}
 		</div>
 		<div>
 			Accuracy: { strings.Split(fmt.Sprintf("%f",f.Accuracy.Value * 100),".")[0] }% 
@@ -57,7 +57,6 @@ templ FighterStats(f game.Fighter) {
 	</div>
 }
 
-
 templ EventLog(f eventlog.FighterEventLog) {
 	<ul id="eventlog">
 		for i, item := range f.Log {
@@ -66,42 +65,6 @@ templ EventLog(f eventlog.FighterEventLog) {
 			</li>
 		}
 	</ul>
-}
-
-templ ProgressBar(curr int, max int) {
-	{{
-		var diff int = max - curr
-	}}
-	<ul id="">
-		for _ = range curr {
-			<li></li>
-		}
-		for _ = range diff {
-			<li></li>
-		}
-	</ul>
-}
-
-templ PopupLogin() {
-	<div id="popup">
-		<button hx-on:click="this.parentElement.setAttribute('hidden',true)">X</button>
-		<h1> Sign up / Log in to JS.bet </h1>
-		<form action="/user/login" method="post">
-			<input type="text" name="name">
-			<input type="text" name="pass">
-			<button type="submit" hx-post="/user/login">Submit </button>
-		</form>
-	</div>
-}
-
-templ Popup(info string) {
-	<div>
-		<p> {info} </p>
-		<button> Close </button>
-	</div>
-}
-templ PopupHidden() {
-	<div id="popup" hidden></div>
 }
 
 templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
@@ -123,8 +86,7 @@ templ FighterIcon(fighter game.Fighter, left bool, assets assets.Assets) {
 		}
 		animationName = "animate-" + fighter.FighterAnim + dir
 	}}
-
-		<div id={iconID} class={fmt.Sprintf("%s %s", animationName, woundedAnim)}>
-			@templ.Raw(assets.IconsSvgs[fighter.Name])
-		</div>
+	<div id={iconID} class={fmt.Sprintf("%s %s", animationName, woundedAnim)}>
+		@templ.Raw(assets.IconsSvgs[fighter.Name])
+	</div>
 }

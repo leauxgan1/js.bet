@@ -69,9 +69,11 @@ func StartServer() {
 	mux := http.NewServeMux()
 	mux.Handle("/", fileServer)
 	mux.Handle("/game/", authMiddlewarePermissive(http.HandlerFunc(handleGame)))
+	mux.Handle("/user/placeBet", authMiddlewareStrict(http.HandlerFunc(handlePlaceBet)))
 	mux.HandleFunc("/user/promptLogin", handlePromptLoginRequest)
 	mux.HandleFunc("/user/login", handleLoginRequest)
-	mux.Handle("/user/placeBet", authMiddlewareStrict(http.HandlerFunc(handlePlaceBet)))
+	mux.HandleFunc("/user/about", handleAbout)
+	mux.HandleFunc("/user/stats", handleStats)
 
 	// Setup event log for server
 	eventlog.EventLog = eventlog.New()
@@ -319,24 +321,6 @@ func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-On a GET request, send a signup popup gui to the user
-*/
-func handlePromptLoginRequest(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		log.Panic("Incorrect method for endpoint 'user/promptLogin', expected GET")
-		return
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	signup := components.PopupLogin()
-	err := signup.Render(context.Background(), w)
-	if err != nil {
-		log.Panic(err)
-		return
-	}
-}
-
-/*
 Get authentication token from user and place a bet with their ID
 */
 func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
@@ -377,4 +361,57 @@ func handlePlaceBet(w http.ResponseWriter, r *http.Request) {
 	}
 	SetBet(userId, betAmount, isLeft)
 	fmt.Fprintf(w, "Placed bet amount for $%d", betAmount)
+}
+
+/*
+On a GET request, send a login popup gui to the user
+*/
+func handlePromptLoginRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		log.Panic("Incorrect method for endpoint 'user/promptLogin', expected GET")
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	login := components.PopupLogin()
+	err := login.Render(context.Background(), w)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+}
+
+/*
+On a GET request, send an about popup gui to the user
+*/
+func handleAbout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		log.Panic("Incorrect method for endpoint 'user/about', expected GET")
+		return
+	}
+	w.Header().Set("Content-Type", "text/html")
+	about := components.PopupAbout()
+	err := about.Render(context.Background(), w)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+}
+
+/*
+On a GET request, send a stats popup gui to the user
+*/
+func handleStats(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		log.Panic("Incorrect method for endpoint 'user/stats', expected GET")
+		return
+	}
+	w.Header().Set("Content-Type", "text/html")
+
+	stats := components.PopupStats()
+	err := stats.Render(context.Background(), w)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
 }

@@ -1,0 +1,36 @@
+package components
+
+
+templ Popup() {
+  <div id="popup">
+		<button hx-on:click="this.parentElement.setAttribute('hidden',true)">X</button>
+    {children...}
+  </div>
+}
+
+
+templ PopupLogin() {
+  @Popup() {
+  	<h1> Sign up / Log in to JS.bet </h1>
+  	<form action="/user/login" method="post">
+  		<input type="text" name="name">
+  		<input type="text" name="pass">
+  		<button type="submit" hx-post="/user/login">Submit </button>
+  	</form>
+  }
+}
+
+templ PopupAbout() {
+  @Popup() {
+  	<h1> About </h1>
+  	<p> About this </p>
+  }
+}
+
+
+templ PopupStats() {
+  @Popup() {
+  	<h1> Stats </h1>
+  	<p> Here are stats </p>
+  }
+}
