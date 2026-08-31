@@ -125,7 +125,7 @@ func PopupAbout() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h1>About </h1><p>About this </p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h1>About </h1><p>This is a virtual fighting simulation between JS frameworks! </p><p>Login to create an account and start earning gold by making safe bets... or just bet on your favorite each time :> </p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -172,7 +172,7 @@ func PopupStats() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<h1>Stats </h1><p>Here are stats </p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<h1>Stats </h1><p>Wins Per Framework </p><table><tr><th>Framework</th><th>Wins</th></tr><tr><td>React</td><td>0</td></tr><tr><td>Jquery</td><td>0</td></tr><tr><td>Datastar</td><td>0</td></tr><tr><td>HTMX</td><td>0</td></tr><tr><td>Vue</td><td>0</td></tr><tr><td>Svelte</td><td>0</td></tr><tr><td>Angular</td><td>0</td></tr></table>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
