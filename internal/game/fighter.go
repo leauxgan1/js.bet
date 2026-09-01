@@ -169,7 +169,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Second most loved, btw!",
 				Description: "",
-				Timer:       NewIntStat(5),
+				Timer:       NewIntStat(8),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
 				},
@@ -192,7 +192,7 @@ var fighterList = [...]Fighter{
 			{
 				Name:        "Most Loved Framework, btw",
 				Description: "",
-				Timer:       NewIntStat(5),
+				Timer:       NewIntStat(10),
 				InvokeFunc: func(self *Fighter, other *Fighter) {
 					self.Health.Value = min(self.Health.Value+10, self.Health.MaxValue)
 				},
@@ -284,9 +284,6 @@ func chooseRandomFighter() Fighter {
 	randomFighter := fighterList[randomIndex]
 	// log.Printf("Randomly chose %v\n", randomFighter)
 	return randomFighter
-}
-func chooseSvelte() Fighter {
-	return fighterList[3]
 }
 
 func chooseRandomFighterExclusive(excludedFighterName string) (Fighter, error) {

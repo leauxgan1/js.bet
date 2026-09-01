@@ -31,7 +31,7 @@ type UserState struct {
 
 func New() GameState {
 	fighters := [2]Fighter{}
-	fighters[0] = chooseSvelte()
+	fighters[0] = chooseRandomFighter()
 	rightFighter, err := chooseRandomFighterExclusive(fighters[0].Name)
 	if err != nil {
 		log.Panic(err)
@@ -103,6 +103,7 @@ func (g *GameState) Act(order ActingOrder) {
 		eventlog.EventLog.Write(fmt.Sprintf("%s just missed...", g.Fighters[fighterIdx].Name))
 		// Add message to the status bar
 		g.Status = fmt.Sprintf("%s attacked %s and missed!", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name)
+		g.Fighters[oppIdx].FighterAnim = "dodge"
 		return
 	} else {
 		g.AudioPlayers.AttackPlaying = true

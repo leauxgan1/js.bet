@@ -1,8 +1,7 @@
-
-
 /* Keyframe definition */
 
 @keyframes idle {
+
 	0%,
 	100% {
 		transform: none;
@@ -24,6 +23,7 @@
 
 
 @keyframes attackleft {
+
 	0%,
 	100% {
 		transform: translateX(0) rotateZ(0deg);
@@ -41,6 +41,7 @@
 
 
 @keyframes attackright {
+
 	0%,
 	100% {
 		transform: translateX(0) rotateZ(0deg);
@@ -88,11 +89,13 @@
 }
 
 @keyframes defendleft {
+
 	0%,
 	50%,
 	100% {
 		transform: none;
 	}
+
 	70% {
 		transform: translateX(-50px) translateY(-30px);
 	}
@@ -101,11 +104,13 @@
 
 
 @keyframes defendright {
+
 	0%,
 	50%,
 	100% {
 		transform: none;
 	}
+
 	70% {
 		transform: translateX(50px) translateY(30px);
 	}
@@ -113,13 +118,15 @@
 
 
 @keyframes dodgeleft {
+
 	0%,
 	25%,
 	100% {
 		transform: none;
 	}
+
 	50% {
-		transform: translateX(-50px) translateY(-30px);
+		transform: translateY(-100px);
 	}
 }
 
@@ -131,19 +138,21 @@
 	100% {
 		transform: none;
 	}
+
 	50% {
-		transform: translateX(50px) translateY(30px);
+		transform: translateY(-100px);
 	}
 }
 
 @keyframes ability {
 	from {
-		transform: rotate(0deg);	
+		transform: rotate(0deg);
 	}
-	to{
-		transform: rotate(360deg);	
+
+	to {
+		transform: rotate(360deg);
 	}
-	
+
 }
 
 /* Styles for animated elements */
@@ -159,65 +168,85 @@ ul {
 
 /* Styles for signaling animations to run */
 
-.animate-idle-left, .animate-idle-right {
+.animate-idle-left,
+.animate-idle-right {
 	animation: idle 1s infinite;
+
 	&.animate-wounded {
-		animation: idle 1s infinite,pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: idle 1s infinite, pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }
+
 .animate-attack-left {
 	animation: attackleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: attackleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: attackleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }
 
 .animate-attack-right {
 	animation: attackright 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: attackright 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: attackright 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 
 }
+
 .animate-crit-left {
 	animation: critleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: critleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: critleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }
+
 .animate-crit-right {
 	animation: critright 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: critright 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: critright 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }
+
 .animate-defend-left {
 	animation: defendleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: defendleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: defendleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }
+
 .animate-defend-right {
 	animation: defendright 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: defendright 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: defendright 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }
+
 .animate-dodge-left {
 	animation: dodgeleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: dodgeleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: dodgeleft 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }
+
 .animate-dodge-right {
 	animation: dodgeright 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: dodgeright 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: dodgeright 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }
-.animate-ability-left,.animate-ability-right {
+
+.animate-ability-left,
+.animate-ability-right {
 	animation: ability 1s 1 cubic-bezier(0.4, 0, 0.2, 1);
+
 	&.animate-wounded {
-		animation: ability 1s 1 cubic-bezier(0.4, 0, 0.2, 1),pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: ability 1s 1 cubic-bezier(0.4, 0, 0.2, 1), pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 }

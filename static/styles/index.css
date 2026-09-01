@@ -14,7 +14,7 @@
 html,
 body {
   color: var(--text-color);
-  font-family: var(--font-mono);
+  /* font-family: var(--font-mono); */
   font-size: clamp(1rem, 1.5vw, 1.2rem);
 }
 
@@ -93,14 +93,15 @@ nav {
   position: fixed;
   top: 70%;
   width: 20%;
+  height: fit-content;
+  max-height: 30%;
 
   background: var(--gray-6);
   padding: var(--size-3);
   border: var(--border-size-3) solid white;
   border-radius: var(--radius-2);
   text-align: center;
-  position: fixed;
-  text-align: center;
+  overflow: scroll;
 
   >* {
     margin-block: var(--size-2);
@@ -134,38 +135,63 @@ nav {
 
 #fight-header {
   position: fixed;
-  z-index: 2;
   text-align: center;
-  min-width: 100%;
-  left: 0%;
-  top: 15%;
+  inset: 15% 0px;
+  width: 26rem;
+  height: 10rem;
+  max-width: 100vw;
+  max-height: 100dvh;
+  margin-inline: auto;
+  z-index: 2;
   font-size: 2em;
 }
 
 #popup {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   padding: var(--size-4);
   background: var(--primary);
   border: var(--border-size-3) solid var(--secondary);
+  border-radius: var(--radius-2);
   text-align: center;
   z-index: 3;
+  width: 45vw;
+  height: 45vh;
+  overflow: scroll;
 
-  h1 {
-    font-size: var(--size-6);
-    padding-block: var(--size-2);
+  >* {
+    margin: auto;
   }
 
-  button {
-    float: right;
+  h2 {
+    text-align: center;
+    padding-block: var(--size-2);
+    /* font-size: 2rem; */
+    text-align: center;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    width: 20px;
+    height: 40px;
   }
 
   form {
     display: flex;
     flex-direction: column;
-    gap: var(--size-2);
+    row-gap: var(--size-2);
 
     button {
       color: var(--text-color);
     }
+  }
+
+  table {
+    width: 100%;
+    overflow: scroll;
   }
 }
 
@@ -176,15 +202,18 @@ nav {
   border-radius: var(--radius-2);
   background: var(--primary);
   z-index: 10;
-  left: 87.5%;
+  right: 5%;
   top: 12.5%;
-  width: 10%;
-  height: 12.5%;
+  width: 15%;
+  height: 10%;
+  max-width: 400px;
+  max-height: 200px;
+  overflow: scroll;
 
   h2 {
     /* Username display */
     color: var(--tertiary);
-    font-size: 0.75em;
+    font-size: 1rem;
     text-align: center;
     margin: 0;
   }
@@ -195,4 +224,16 @@ nav {
     text-align: center;
   }
 
+}
+
+path {
+  /* fill: none; */
+  stroke: var(--neutral);
+  stroke-width: 0.15px;
+  /* stroke-dasharray: 2, 2; */
+  /* stroke-linejoin: round; */
+}
+
+svg {
+  filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
 }

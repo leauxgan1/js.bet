@@ -29,7 +29,7 @@ func Popup() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"popup\"><button hx-on:click=\"this.parentElement.setAttribute('hidden',true)\">X</button>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"popup\"><button class=\"close-button\" hx-on:click=\"this.parentElement.setAttribute('hidden',true)\">X</button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -78,7 +78,7 @@ func PopupLogin() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<h1>Sign up / Log in to JS.bet </h1><form action=\"/user/login\" method=\"post\"><input type=\"text\" name=\"name\"> <input type=\"text\" name=\"pass\"> <button type=\"submit\" hx-post=\"/user/login\">Submit </button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<h2>Sign up / Log in to JS.bet </h2><form action=\"/user/login\" method=\"post\"><input type=\"text\" name=\"name\"> <input type=\"text\" name=\"pass\"> <button type=\"submit\" hx-post=\"/user/login\">Submit </button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -125,7 +125,7 @@ func PopupAbout() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h1>About </h1><p>This is a virtual fighting simulation between JS frameworks! </p><p>Login to create an account and start earning gold by making safe bets... or just bet on your favorite each time :> </p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h2>About </h2><p>This is a virtual fighting simulation between JS frameworks! </p><p>Login to create an account and start earning gold by making safe bets... or just bet on your favorite each time :> </p><h3>Fighter Statistics </h3><p>Each fighter has a set of statistics which determine their strengths and weaknesses, both in this game and when used in real-life to make apps: </p><p>Health:<p>In Game: Increases survivability</p><p>In World: Represents how much of an \"industry standard\" the framework/library is / likelihood to stick around in the future </p></p><p>Damage: <p>In Game: Increases Lethality</p><p>In World: Represents how consistently useful the framework/library is for common tasks </p></p><p>Speed<p>In Game: Determines how quickly the fighter gets to perform its next attack </p><p>In World: Represents the overall performance under load and scalability of the framework/library, causes fighter to act sooner</p></p><p>Accuracy<p>In Game:</p><p>In World: Represents how simple the library/frame work is / how easy it is to get it right at first (opposite of footguns), causes less misses</p></p><p>Dodge<p>In Game:</p><p>In World: Represents how quickly the framework can adapt and rebound after a failure</p></p><p>CritRate<p>In Game:</p><p>In World: Represents how suprisingly useful or versatile the framework/library is in niche situations</p></p><p>Abilities<p>In Game: Abilities which may apply status effects to fighters</p><p>In World: Killer Features or Common Stereotypes of the Framework that make it stand out </p></p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -172,7 +172,7 @@ func PopupStats() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<h1>Stats </h1><p>Wins Per Framework </p><table><tr><th>Framework</th><th>Wins</th></tr><tr><td>React</td><td>0</td></tr><tr><td>Jquery</td><td>0</td></tr><tr><td>Datastar</td><td>0</td></tr><tr><td>HTMX</td><td>0</td></tr><tr><td>Vue</td><td>0</td></tr><tr><td>Svelte</td><td>0</td></tr><tr><td>Angular</td><td>0</td></tr></table>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<h2>Stats </h2><p>Wins Per Framework </p><table><tr><th>Framework</th><th>Wins</th></tr><tr><td>React</td><td>0</td></tr><tr><td>Jquery</td><td>0</td></tr><tr><td>Datastar</td><td>0</td></tr><tr><td>HTMX</td><td>0</td></tr><tr><td>Vue</td><td>0</td></tr><tr><td>Svelte</td><td>0</td></tr><tr><td>Angular</td><td>0</td></tr></table>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
