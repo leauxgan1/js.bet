@@ -52,6 +52,9 @@ templ FighterStats(f game.Fighter) {
 			Accuracy: { strings.Split(fmt.Sprintf("%f",f.Accuracy.Value * 100),".")[0] }% 
 		</div> 
 		<div>
+			Dodge: { strings.Split(fmt.Sprintf("%f",f.Dodge.Value * 100),".")[0] }% 
+		</div> 
+		<div>
 			Crit: { strings.Split(fmt.Sprintf("%f",f.CritRate.Value * 100),".")[0] }% 
 		</div>
 	</div>

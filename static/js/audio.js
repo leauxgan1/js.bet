@@ -1,7 +1,7 @@
 const audioCache = {};
 
 async function preloadAudioBuffers() {
-  const audioFiles = ['attack', 'block', 'crit', 'dodge', 'winner'];
+  const audioFiles = ['attack', 'block', 'crit', 'dodge', 'winner', 'ability-buff','ability-debuff','ability-trick','ability-damage',];
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   
   for (const name of audioFiles) {

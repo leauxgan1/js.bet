@@ -105,21 +105,19 @@ func (g *GameState) Act(order ActingOrder) {
 		g.Status = fmt.Sprintf("%s attacked %s and missed!", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name)
 		g.Fighters[oppIdx].FighterAnim = "dodge"
 		return
-	} else {
-		g.AudioPlayers.AttackPlaying = true
-		// Add message to the status bar
-		g.Status = fmt.Sprintf("%s attacked %s", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name)
 	}
 	g.Fighters[oppIdx].FighterAnim = "defend"
 	g.AudioPlayers.BlockPlaying = true
 	crit := g.Fighters[fighterIdx].CheckCrit()
 	if crit {
-		g.AudioPlayers.AttackPlaying = false
 		g.AudioPlayers.CritPlaying = true
 		damage *= 2.0
 		g.Fighters[fighterIdx].FighterAnim = "crit"
-		eventlog.EventLog.Write(fmt.Sprintf("%s just critically hit %s for %d", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name, damage))
+		g.Status = fmt.Sprintf("%s attacked %s and critically hit!", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name)
+		eventlog.EventLog.Write(fmt.Sprintf("%s just attacked %s and critically hit for %d!", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name, damage))
 	} else {
+		g.AudioPlayers.AttackPlaying = true
+		g.Status = fmt.Sprintf("%s attacked %s", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name)
 		eventlog.EventLog.Write(fmt.Sprintf("%s just hit %s for %d", g.Fighters[fighterIdx].Name, g.Fighters[oppIdx].Name, damage))
 	}
 	g.Fighters[oppIdx].Health.Value -= damage
@@ -159,7 +157,7 @@ func (g *GameState) determineWinner() WinnerEnum {
 
 func useAbility(abilityIdx int, self *Fighter, other *Fighter, gs *GameState) {
 	ability := self.Abilities[abilityIdx]
-	ability.InvokeFunc(self, other)
+	ability.InvokeFunc(self, other, &gs.AudioPlayers)
 	eventlog.EventLog.Write(fmt.Sprintf("%s used '%s' ", self.Name, ability.Name))
 	self.Abilities[abilityIdx].Timer.Value = ability.Timer.MaxValue
 	self.FighterAnim = "ability"
